@@ -1,0 +1,283 @@
+/* Слайдер секция */
+.sliderSection {
+  margin-bottom: 2rem;
+}
+
+.sliderSection h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.sliderWrapper {
+  flex: 1;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.sliderTrack {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+
+.slideCard {
+  flex-shrink: 0;
+  width: 100%;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+}
+
+.slideCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-light);
+}
+
+.slideContent {
+  padding: 1.5rem;
+}
+
+.slideHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.slideTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.slidePointsBadge {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: white;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.slideDetails {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.slideDetail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.slideDetail svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+.slideTeacher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.slideTeacher svg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+}
+
+.slideDescription {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.slideStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.slideRegisterBtn {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slideRegisterBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+.slideRegisteredBtn {
+  background: var(--danger);
+  cursor: pointer;
+  opacity: 1;
+}
+
+.slideRegisteredBtn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.slideRegisterBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Стрелки слайдера */
+.sliderArrow {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.sliderArrow:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.sliderArrowLeft {
+  left: 0;
+}
+
+.sliderArrowRight {
+  right: 0;
+}
+
+/* Индикаторы слайдов */
+.sliderDots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.sliderDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-300);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.sliderDot:hover {
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
+.sliderDotActive {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+/* Адаптивность для слайдера */
+@media (max-width: 768px) {
+  .sliderArrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+  }
+  
+  .slideContent {
+    padding: 1.25rem;
+  }
+  
+  .slideTitle {
+    font-size: 1.125rem;
+  }
+  
+  .slideHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .slidePointsBadge {
+    align-self: flex-start;
+  }
+  
+  .slideDetails {
+    gap: 1rem;
+  }
+  
+  .slideDetail {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sliderArrow {
+    width: 32px;
+    height: 32px;
+    font-size: 1.25rem;
+  }
+  
+  .slideContent {
+    padding: 1rem;
+  }
+  
+  .slideTitle {
+    font-size: 1rem;
+  }
+  
+  .slideDescription {
+    font-size: 0.813rem;
+  }
+}

@@ -1,0 +1,1180 @@
+/* Основной контейнер */
+.profilePage {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+  }
+  
+  /* Боковое меню */
+  .sidebar {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid #e5e7eb;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Блок с информацией о пользователе */
+.userInfoBlock {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.infoCard {
+  background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px 24px;
+  color: black;
+  flex: 1;
+  min-width: 200px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.infoLabel {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.infoValue {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 768px) {
+  .userInfoBlock {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .infoCard {
+    padding: 12px 20px;
+  }
+  
+  .infoValue {
+    font-size: 18px;
+  }
+}
+  
+  .logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+  
+  .logoContainer span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4F6AF5, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .navMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
+  .menuItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+  }
+  
+  .menuItem:hover {
+    background: #eef2ff;
+    color: #4F6AF5;
+  }
+  
+  .activeMenu {
+    background: #eef2ff;
+    color: #4F6AF5;
+  }
+  
+  .menuIcon {
+    font-size: 1.25rem;
+  }
+  
+  .sidebarFooter {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Основной контент */
+  .mainContent {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+  }
+  
+  /* Шапка пользователя */
+  .userHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .userAvatar {
+    flex-shrink: 0;
+  }
+  
+  .avatarPlaceholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4F6AF5, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .userInfo {
+    flex: 1;
+  }
+  
+  .userName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+  }
+  
+  .userSpecialization {
+    color: #4F6AF5;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .userBadges {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .badge {
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  /* Блок мероприятий */
+  .eventsBlock {
+    margin-top: 1rem;
+  }
+  
+  .eventsBlock h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .eventsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .eventCard {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+  }
+  
+  .eventCard:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: #4F6AF5;
+  }
+  
+  .eventTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .eventDescription {
+    font-size: 0.813rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  
+  .eventMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+  
+  .eventActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .testBtn {
+    background: #4F6AF5;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .testBtn:hover {
+    background: #3a55d1;
+  }
+  
+  .completedBadge {
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .pendingBadge {
+    color: #d97706;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .draftBadge {
+    color: #d97706;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .publishedBadge {
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .finishedBadge {
+    color: #7e22ce;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .cancelledBadge {
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .publishBtn {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .publishBtn:hover {
+    background: #047857;
+  }
+
+  .finishBtn {
+    background: #7e22ce;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .finishBtn:hover {
+    background: #6b21a8;
+  }
+
+  .cancelEventBtn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .cancelEventBtn:hover {
+    background: #dc2626;
+  }
+
+  .eventActions .editBtn {
+    margin-top: 0;
+    background: #ffffff;
+    border: 1px solid #4F6AF5;
+    color: #4F6AF5;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .eventActions .editBtn:hover {
+    background: #4F6AF5;
+    color: #ffffff;
+  }
+
+  .rejectedBadge {
+    color: #dc2626;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .emptyStateText {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  /* Страница настроек */
+  .settingsPage {
+    max-width: 600px;
+  }
+  
+  .settingsBlock {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .settingsBlock h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+  
+  .settingsInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .settingsRow {
+    display: flex;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .settingsLabel {
+    width: 120px;
+    font-weight: 500;
+    color: #6b7280;
+  }
+  
+  .editBtn {
+    margin-top: 1rem;
+    background: none;
+    border: 1px solid #4F6AF5;
+    color: #4F6AF5;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+  
+  .editBtn:hover {
+    background: #4F6AF5;
+    color: white;
+  }
+  
+  .editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .editInput {
+    padding: 0.625rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.875rem;
+  }
+  
+  .editInput:focus {
+    outline: none;
+    border-color: #4F6AF5;
+  }
+  
+  .editActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .saveBtn, .cancelBtn {
+    flex: 1;
+    padding: 0.625rem;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .saveBtn {
+    background: #10b981;
+    color: white;
+    border: none;
+  }
+  
+  .saveBtn:hover {
+    background: #059669;
+  }
+  
+  .cancelBtn {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+  }
+  
+  .supportInfo p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+  
+  .supportContacts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .supportContact {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .supportContact span {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .supportContact a {
+    color: #4F6AF5;
+    text-decoration: none;
+  }
+  
+  .supportContact a:hover {
+    text-decoration: underline;
+  }
+  
+  .logoutBtn {
+    width: 100%;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .logoutBtn:hover {
+    background: #dc2626;
+  }
+  
+  /* Модальное окно */
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .reportModal {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    animation: slideUp 0.3s ease;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .modalHeader h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  
+  .modalClose {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #6b7280;
+  }
+  
+  .modalBody {
+    padding: 1.5rem;
+  }
+  
+  .modalBody p {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .modalBody label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .reportTextarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    resize: vertical;
+    font-family: inherit;
+  }
+  
+  .reportTextarea:focus {
+    outline: none;
+    border-color: #4F6AF5;
+  }
+  
+  .reportHint {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
+  }
+  
+  .modalFooter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .cancelReportBtn, .submitReportBtn {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.625rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .cancelReportBtn {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+  }
+  
+  .submitReportBtn {
+    background: #4F6AF5;
+    border: none;
+    color: white;
+  }
+  
+  .submitReportBtn:hover {
+    background: #3a55d1;
+  }
+
+  /* Перенесено из MainPage: блоки баллов и цели */
+  .statsWrapper {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .pointsCard {
+    flex: 1;
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+  }
+  
+  .pointsCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+  
+  .pointsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .pointsHeader svg {
+    color: #9605ca;
+    stroke: #9605ca;
+  }
+  
+  .pointsHeader h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .pointsAmount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #9605ca, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0.5rem 0;
+  }
+  
+  .pointsDescription {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  
+  .pendingPoints {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  
+  .pendingPoints strong {
+    color: #f59e0b;
+    font-size: 1rem;
+  }
+  
+  .goalCard {
+    flex: 1;
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .goalCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+  
+  .goalHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .goalHeader svg {
+    color: #f59e0b;
+    stroke: #f59e0b;
+  }
+  
+  .goalHeader h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .goalPeriod {
+    font-size: 0.875rem;
+    color: #4b5563;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  
+  .goalStats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .goalStatItem {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  .goalStatLabel {
+    font-size: 0.75rem;
+    color: #4b5563;
+  }
+  
+  .goalStatValue {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+  
+  .progressBarContainer {
+    background: #e5e7eb;
+    border-radius: 9999px;
+    height: 0.75rem;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+  
+  .progressBar {
+    background: linear-gradient(90deg, #9605ca, #8b5cf6);
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+  }
+  
+  .goalMessage {
+    font-size: 0.875rem;
+    color: #4b5563;
+    font-weight: 500;
+    text-align: center;
+    padding-top: 0.5rem;
+  }
+
+  .adminLeadText {
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .adminPrimaryBtn {
+    width: 100%;
+    background: #4F6AF5;
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .adminPrimaryBtn:hover {
+    background: #3a55d1;
+  }
+
+  .adminSummaryStats {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .reportReviewCard {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+  }
+
+  .reportReviewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .reportMetaText {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0.35rem 0 0;
+  }
+
+  .reportReviewText {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #374151;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    word-break: break-word;
+  }
+
+  .reportLink {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    color: #4F6AF5;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .reportLink:hover {
+    text-decoration: underline;
+  }
+
+  .reportReviewActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .pointsInput {
+    width: 120px;
+    min-width: 120px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .pointsInput:focus {
+    outline: none;
+    border-color: #4F6AF5;
+  }
+
+  .approveBtn,
+  .rejectBtn {
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .approveBtn {
+    background: #10b981;
+    color: white;
+  }
+
+  .rejectBtn {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .approveBtn:hover,
+  .rejectBtn:hover {
+    opacity: 0.9;
+  }
+  .profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profileSpecialization {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 12px 0;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.profileDetails {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.profileDetails span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Адаптив для планшетов */
+@media (max-width: 768px) {
+  .profileHeader {
+    padding: 20px 24px;
+    gap: 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 36px;
+  }
+
+  .profileName {
+    font-size: 24px;
+  }
+
+  .profileSpecialization {
+    font-size: 14px;
+  }
+
+  .profileDetails {
+    justify-content: center;
+    font-size: 13px;
+  }
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 480px) {
+  .profileHeader {
+    padding: 16px 20px;
+    gap: 16px;
+    border-radius: 20px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+
+  .profileName {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .profileSpecialization {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .profileDetails {
+    font-size: 11px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+  .profileHeader {
+    padding: 12px 16px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .profileName {
+    font-size: 18px;
+  }
+}
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .profilePage {
+      flex-direction: column;
+    }
+    
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      padding: 1rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .logoContainer {
+      margin-bottom: 0;
+    }
+    
+    .navMenu {
+      flex-direction: row;
+      order: 2;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .sidebarFooter {
+      margin-top: 0;
+      border: none;
+      flex-direction: row;
+      gap: 1rem;
+    }
+    
+    .mainContent {
+      padding: 1.5rem;
+    }
+    
+    .userHeader {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .userBadges {
+      justify-content: center;
+    }
+    
+    .statsWrapper {
+      flex-direction: column;
+    }
+    
+    .goalStats {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .adminSummaryStats {
+      flex-direction: column;
+    }
+
+    .eventMeta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .reportReviewHeader,
+    .reportReviewActions {
+      flex-direction: column;
+    }
+
+    .settingsRow {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .settingsLabel {
+      width: auto;
+    }
+  }
