@@ -1,75 +1,128 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+﻿import axios from 'axios';
 
-const safeJsonParse = (text) => {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const DEV_COOKIE_PAIR = 'session=CDS-login-user=i23s0044';
+const STUB_COOKIE_VALUE = String(import.meta.env.VITE_STUB_COOKIE || DEV_COOKIE_PAIR).trim();
+const STUB_COOKIE_HEADER_NAME = String(import.meta.env.VITE_STUB_COOKIE_HEADER || 'X-Stub-Cookie').trim();
+const STUB_COOKIE_SAME_SITE = String(import.meta.env.VITE_STUB_COOKIE_SAME_SITE || 'Lax').trim();
+const STUB_COOKIE_SECURE = String(import.meta.env.VITE_STUB_COOKIE_SECURE || '').trim().toLowerCase() === 'true';
+
+const parseCookiePair = (cookieString) => {
+  const firstChunk = String(cookieString || '').split(';')[0]?.trim();
+  if (!firstChunk) return null;
+
+  const separatorIndex = firstChunk.indexOf('=');
+  if (separatorIndex <= 0) return null;
+
+  const name = firstChunk.slice(0, separatorIndex).trim();
+  const value = firstChunk.slice(separatorIndex + 1).trim();
+  if (!name) return null;
+  return { name, value };
 };
 
-export async function apiFetch(path, { method = 'GET', body, token, params } = {}) {
-  const headers = {
-    Accept: 'application/json',
-  };
-  const hasBody = body !== undefined && body !== null;
+const ensureDevCookie = () => {
+  if (typeof document === 'undefined') return;
 
-  if (hasBody && !(body instanceof FormData) && !(body instanceof URLSearchParams)) {
-    headers['Content-Type'] = 'application/json';
+  const parsedCookie = parseCookiePair(DEV_COOKIE_PAIR);
+  if (!parsedCookie) return;
+
+  const { name, value } = parsedCookie;
+  const existingCookieValue = document.cookie
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`));
+
+  if (existingCookieValue === `${name}=${value}`) return;
+
+  const sameSite = ['Lax', 'Strict', 'None'].includes(STUB_COOKIE_SAME_SITE) ? STUB_COOKIE_SAME_SITE : 'Lax';
+  const secureFlag = STUB_COOKIE_SECURE ? '; Secure' : '';
+  document.cookie = `${name}=${value}; Path=/; SameSite=${sameSite}${secureFlag}`;
+};
+
+const buildCookieHeaders = () => {
+  const headers = {};
+  const cookieValue = STUB_COOKIE_VALUE || DEV_COOKIE_PAIR;
+  if (!cookieValue || !STUB_COOKIE_HEADER_NAME) return headers;
+
+  headers[STUB_COOKIE_HEADER_NAME] = cookieValue;
+  headers.Cookie = cookieValue;
+
+  return headers;
+};
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
+const normalizeErrorMessage = (error) => {
+  const status = error?.response?.status;
+  const data = error?.response?.data;
+
+  if ([502, 503, 504].includes(status)) {
+    return 'API server is unavailable. Check backend and proxy settings.';
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  return data?.message
+    ?? data?.error
+    ?? data?.errors?.[0]?.message
+    ?? data?.detail
+    ?? error?.message
+    ?? `Request failed with status ${status ?? 'unknown'}`;
+};
 
-  let url = `${API_BASE_URL}${path}`;
-  if (params && Object.keys(params).length > 0) {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, value);
-      }
+export async function apiFetch(path, { method = 'GET', body, params } = {}) {
+  ensureDevCookie();
+
+  try {
+    const response = await api.request({
+      url: path,
+      method,
+      params,
+      data: body,
+      headers: {
+        Accept: 'application/json',
+        ...buildCookieHeaders(),
+      },
     });
 
-    const queryString = queryParams.toString();
-    if (queryString) {
-      url += `?${queryString}`;
+    if (response.status === 204) {
+      return { success: true };
     }
-  }
 
-  const requestBody = hasBody && !(body instanceof FormData) && !(body instanceof URLSearchParams)
-    ? JSON.stringify(body)
-    : body;
-
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: requestBody,
-  });
-
-  if (res.status === 204) {
-    return { success: true };
-  }
-
-  const rawText = await res.text().catch(() => '');
-  const parsed = rawText ? safeJsonParse(rawText) : null;
-
-  if (!res.ok) {
-    const isProxyOrGatewayError = [502, 503, 504].includes(res.status);
-    const message = isProxyOrGatewayError
-      ? 'API-сервер недоступен. Проверьте, что бэкенд запущен и адрес прокси указан верно.'
-      : parsed?.message
-      ?? parsed?.error
-      ?? parsed?.errors?.[0]?.message
-      ?? parsed?.detail
-      ?? rawText
-      ?? `Request failed with status ${res.status}`;
-
-    const err = new Error(message);
-    err.status = res.status;
-    err.data = parsed;
+    return response.data ?? { success: true };
+  } catch (error) {
+    const err = new Error(normalizeErrorMessage(error));
+    err.status = error?.response?.status;
+    err.data = error?.response?.data ?? null;
     throw err;
   }
+}
 
-  return parsed ?? { success: true };
+export async function apiFetchBlob(path, { method = 'GET', params } = {}) {
+  ensureDevCookie();
+
+  try {
+    const response = await api.request({
+      url: path,
+      method,
+      params,
+      responseType: 'blob',
+      headers: {
+        Accept: '*/*',
+        ...buildCookieHeaders(),
+      },
+    });
+
+    return {
+      blob: response.data,
+      headers: response.headers ?? {},
+      status: response.status,
+    };
+  } catch (error) {
+    const err = new Error(normalizeErrorMessage(error));
+    err.status = error?.response?.status;
+    err.data = error?.response?.data ?? null;
+    throw err;
+  }
 }

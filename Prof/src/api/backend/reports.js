@@ -1,5 +1,6 @@
 import { apiFetch } from '../apiClient';
 import { enrollInEvent, fetchEvents } from './events';
+import { fetchCurrentUserSummary } from './users';
 import {
   ENDPOINTS,
   MY_REPORT_STATUSES,
@@ -15,11 +16,10 @@ import {
   pickPublicId,
   toNumberOrNull,
 } from './shared';
-export async function createReport(token, eventPublicId, payload = {}) {
+export async function createReport(eventPublicId, payload = {}) {
   const reportLink = payload.reportLink ?? payload.link ?? payload.reportText;
   const data = await apiFetch(ENDPOINTS.participationRecords(eventPublicId), {
     method: 'POST',
-    token,
     body: cleanObject({
       reportLink,
     }),
@@ -34,7 +34,7 @@ export async function createReport(token, eventPublicId, payload = {}) {
   });
 }
 
-export async function updateReport(token, eventPublicId, publicId, payload = {}) {
+export async function updateReport(eventPublicId, publicId, payload = {}) {
   const reportLink = payload.reportLink ?? payload.link ?? payload.reportText;
 
   if (!publicId) {
@@ -43,7 +43,6 @@ export async function updateReport(token, eventPublicId, publicId, payload = {})
 
   const data = await apiFetch(ENDPOINTS.participationRecord(eventPublicId, publicId), {
     method: 'PATCH',
-    token,
     body: cleanObject({
       reportLink,
     }),
@@ -59,14 +58,13 @@ export async function updateReport(token, eventPublicId, publicId, payload = {})
   });
 }
 
-export async function fetchMyParticipationRecords(token, eventPublicId, filters = {}, options = {}) {
+export async function fetchMyParticipationRecords(eventPublicId, filters = {}, options = {}) {
   const statuses = filters.statuses ?? MY_REPORT_STATUSES;
   const normalizedStatuses = Array.isArray(statuses) ? statuses : [statuses];
   const fallbackStatus = normalizedStatuses.length === 1 ? normalizedStatuses[0] : filters.status;
 
   const data = await apiFetch(ENDPOINTS.participationRecordsForMe(eventPublicId), {
     method: 'POST',
-    token,
     params: buildSearchParams(options),
     body: cleanObject({
       eventPublicId: filters.eventPublicId ?? eventPublicId,
@@ -85,25 +83,54 @@ export async function fetchMyParticipationRecords(token, eventPublicId, filters 
   }));
 }
 
-export async function fetchMyRegisteredEvents(token, filters = {}, options = {}) {
-  const publicEvents = await fetchEvents(token, filters, options);
+export async function fetchMyRegisteredEvents(filters = {}, options = {}) {
+  const publicEvents = await fetchEvents(filters, options);
   const enrolledEvents = publicEvents.filter((event) => event.alreadyParticipation === true);
+  const statusPriority = MY_REPORT_STATUS_PRIORITY.reduce((priority, status, index) => ({
+    ...priority,
+    [normalizeReportStatus(status)]: index,
+  }), {});
+  const getRecordKey = (record = {}) => [
+    record.publicId || '',
+    record.eventPublicId || '',
+    record.studentId || record.studentName || '',
+    record.reportLink || '',
+  ].join('|');
 
   return Promise.all(enrolledEvents.map(async (event) => {
     const eventPublicId = event.publicId || event.id;
     if (!eventPublicId) return event;
 
     try {
-      const recordsByStatus = await Promise.all(MY_REPORT_STATUS_PRIORITY.map((status) =>
-        fetchMyParticipationRecords(token, eventPublicId, {
-          eventPublicId,
-          eventTitle: event.title,
-          eventPoints: event.maxPoints || event.points,
-          statuses: [status],
-          teacherName: event.teacherName || event.teacher,
-        }, options),
-      ));
-      const record = recordsByStatus.flat()[0];
+      const recordsByStatus = await fetchMyParticipationRecords(eventPublicId, {
+        eventPublicId,
+        eventTitle: event.title,
+        eventPoints: event.maxPoints || event.points,
+        statuses: MY_REPORT_STATUS_PRIORITY,
+        teacherName: event.teacherName || event.teacher,
+      }, options);
+      const dedupedRecords = new Map();
+      recordsByStatus.forEach((record) => {
+        const key = getRecordKey(record);
+        if (!dedupedRecords.has(key)) {
+          dedupedRecords.set(key, record);
+        }
+      });
+
+      const sortedRecords = [...dedupedRecords.values()].sort((left, right) => {
+        const leftPriority = statusPriority[left.status] ?? Number.MAX_SAFE_INTEGER;
+        const rightPriority = statusPriority[right.status] ?? Number.MAX_SAFE_INTEGER;
+        if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+
+        const leftPoints = Number(left.awardedPoints ?? 0) || 0;
+        const rightPoints = Number(right.awardedPoints ?? 0) || 0;
+        if (leftPoints !== rightPoints) return rightPoints - leftPoints;
+
+        const leftUpdatedAt = Date.parse(left.updatedAt ?? left.createdAt ?? '') || 0;
+        const rightUpdatedAt = Date.parse(right.updatedAt ?? right.createdAt ?? '') || 0;
+        return rightUpdatedAt - leftUpdatedAt;
+      });
+      const record = sortedRecords.find((item) => item.reportLink || item.status !== 'draft') ?? sortedRecords[0];
 
       if (!record) {
         return {
@@ -139,14 +166,13 @@ export async function fetchMyRegisteredEvents(token, filters = {}, options = {})
   }));
 }
 
-export async function submitReport(token, eventPublicId, publicId) {
+export async function submitReport(eventPublicId, publicId) {
   if (!publicId) {
     throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442 \u0434\u043b\u044f \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0438');
   }
 
   const data = await apiFetch(ENDPOINTS.participationRecordSubmit(eventPublicId, publicId), {
     method: 'PATCH',
-    token,
   });
   return {
     ...normalizeParticipationRecord(getParticipationRecordPayload(data), {
@@ -160,14 +186,13 @@ export async function submitReport(token, eventPublicId, publicId) {
   };
 }
 
-export async function returnReportToDraft(token, eventPublicId, publicId) {
+export async function returnReportToDraft(eventPublicId, publicId) {
   if (!publicId) {
     throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442 \u0434\u043b\u044f \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0430 \u0432 \u0447\u0435\u0440\u043d\u043e\u0432\u0438\u043a');
   }
 
   const data = await apiFetch(ENDPOINTS.participationRecordReturnToDraft(eventPublicId, publicId), {
     method: 'PATCH',
-    token,
   });
   return {
     ...normalizeParticipationRecord(getParticipationRecordPayload(data), {
@@ -181,14 +206,13 @@ export async function returnReportToDraft(token, eventPublicId, publicId) {
   };
 }
 
-export async function refuseReport(token, eventPublicId, publicId) {
+export async function refuseReport(eventPublicId, publicId) {
   if (!publicId) {
     throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442 \u0434\u043b\u044f \u043e\u0442\u043a\u0430\u0437\u0430');
   }
 
   const data = await apiFetch(ENDPOINTS.participationRecordRefuse(eventPublicId, publicId), {
     method: 'PATCH',
-    token,
   });
   return {
     ...normalizeParticipationRecord(getParticipationRecordPayload(data), {
@@ -202,7 +226,7 @@ export async function refuseReport(token, eventPublicId, publicId) {
   };
 }
 
-export async function acceptReport(token, eventPublicId, publicId, payload = {}) {
+export async function acceptReport(eventPublicId, publicId, payload = {}) {
   if (!publicId) {
     throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442 \u0434\u043b\u044f \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f');
   }
@@ -216,7 +240,6 @@ export async function acceptReport(token, eventPublicId, publicId, payload = {})
 
   const data = await apiFetch(ENDPOINTS.participationRecordAccept(eventPublicId, publicId), {
     method: 'PATCH',
-    token,
     body: cleanObject({
       points: normalizedPoints,
     }),
@@ -239,8 +262,8 @@ export async function acceptReport(token, eventPublicId, publicId, payload = {})
   };
 }
 
-export async function fetchMyApplications(token) {
-  const events = await fetchMyRegisteredEvents(token);
+export async function fetchMyApplications() {
+  const events = await fetchMyRegisteredEvents();
   return events
     .filter((event) => event.reportPublicId || event.reportLink)
     .map((event) => ({
@@ -256,15 +279,21 @@ export async function fetchMyApplications(token) {
     }));
 }
 
-export async function fetchMyPoints(_token, fallback = 0) {
-  return Number(fallback ?? 0) || 0;
+export async function fetchMyPoints(fallback = 0) {
+  try {
+    const summary = await fetchCurrentUserSummary();
+    return Number(summary.totalPoints ?? fallback ?? 0) || 0;
+  } catch (error) {
+    console.warn('Failed to load user summary points:', error);
+    return Number(fallback ?? 0) || 0;
+  }
 }
 
-export async function registerForEvent(token, eventPublicId) {
-  return enrollInEvent(token, eventPublicId);
+export async function registerForEvent(eventPublicId) {
+  return enrollInEvent(eventPublicId);
 }
 
-export async function saveEventReportDraft(token, payload = {}) {
+export async function saveEventReportDraft(payload = {}) {
   const eventPublicId = payload.eventPublicId;
   const publicId = payload.forceCreate ? '' : (payload.publicId ?? payload.reportPublicId);
   const reportLink = payload.reportLink ?? payload.link ?? payload.reportText;
@@ -278,19 +307,19 @@ export async function saveEventReportDraft(token, payload = {}) {
   }
 
   return publicId
-    ? await updateReport(token, eventPublicId, publicId, {
+    ? await updateReport(eventPublicId, publicId, {
         ...payload,
         publicId,
         reportLink,
       })
-    : await createReport(token, eventPublicId, {
+    : await createReport(eventPublicId, {
         ...payload,
         eventPublicId,
         reportLink,
       });
 }
 
-export async function submitEventReport(token, payload = {}) {
+export async function submitEventReport(payload = {}) {
   const eventPublicId = payload.eventPublicId;
   const payloadPublicId = payload.forceCreate ? '' : (payload.publicId ?? payload.reportPublicId);
   const reportLink = payload.reportLink ?? payload.link ?? payload.reportText;
@@ -304,7 +333,7 @@ export async function submitEventReport(token, payload = {}) {
   }
 
   const report = reportLink
-    ? await saveEventReportDraft(token, {
+    ? await saveEventReportDraft({
         ...payload,
         eventPublicId,
         publicId: payloadPublicId,
@@ -321,17 +350,16 @@ export async function submitEventReport(token, payload = {}) {
     throw new Error('Бэк не прислал ID отчета');
   }
 
-  return submitReport(token, eventPublicId, publicId);
+  return submitReport(eventPublicId, publicId);
 }
 
-export async function fetchParticipationRecordsForMyEvent(token, eventPublicId, filters = {}, options = {}) {
+export async function fetchParticipationRecordsForMyEvent(eventPublicId, filters = {}, options = {}) {
   const statuses = filters.statuses ?? REVIEW_REPORT_STATUSES;
   const normalizedStatuses = Array.isArray(statuses) ? statuses : [statuses];
   const fallbackStatus = normalizedStatuses.length === 1 ? normalizedStatuses[0] : filters.status;
 
   const data = await apiFetch(ENDPOINTS.participationRecordsForMyEvents(eventPublicId), {
     method: 'POST',
-    token,
     params: buildSearchParams(options),
     body: cleanObject({
       eventPublicId: filters.eventPublicId ?? eventPublicId,
@@ -372,7 +400,7 @@ const dedupeReviewRecords = (records = []) => {
   return [...deduped.values()];
 };
 
-export async function fetchAdminPendingReports(token, eventsOrFilters = [], options = {}) {
+export async function fetchAdminPendingReports(eventsOrFilters = [], options = {}) {
   const events = Array.isArray(eventsOrFilters) ? eventsOrFilters : [];
   const filters = Array.isArray(eventsOrFilters) ? {} : eventsOrFilters;
 
@@ -381,19 +409,15 @@ export async function fetchAdminPendingReports(token, eventsOrFilters = [], opti
     const normalizedStatuses = Array.isArray(requestedStatuses) ? requestedStatuses : [requestedStatuses];
     const recordsByEvent = await Promise.all(events
       .filter((event) => event.publicId || event.id)
-      .map(async (event) => {
-        const eventRecordsByStatus = await Promise.all(normalizedStatuses.map((status) =>
-          fetchParticipationRecordsForMyEvent(token, event.publicId || event.id, {
-            ...filters,
-            eventTitle: event.title,
-            eventPoints: event.maxPoints || event.points,
-            statuses: [status],
-            teacherName: event.teacherName || event.teacher,
-          }, options),
-        ));
-
-        return eventRecordsByStatus.flat();
-      }));
+      .map((event) =>
+        fetchParticipationRecordsForMyEvent(event.publicId || event.id, {
+          ...filters,
+          eventTitle: event.title,
+          eventPoints: event.maxPoints || event.points,
+          statuses: normalizedStatuses,
+          teacherName: event.teacherName || event.teacher,
+        }, options),
+      ));
 
     return dedupeReviewRecords(recordsByEvent.flat());
   }
@@ -401,20 +425,18 @@ export async function fetchAdminPendingReports(token, eventsOrFilters = [], opti
   if (filters.eventPublicId) {
     const requestedStatuses = filters.statuses ?? REVIEW_REPORT_STATUS_PRIORITY;
     const normalizedStatuses = Array.isArray(requestedStatuses) ? requestedStatuses : [requestedStatuses];
-    const recordsByStatus = await Promise.all(normalizedStatuses.map((status) =>
-      fetchParticipationRecordsForMyEvent(token, filters.eventPublicId, {
-        ...filters,
-        statuses: [status],
-      }, options),
-    ));
+    const recordsByStatus = await fetchParticipationRecordsForMyEvent(filters.eventPublicId, {
+      ...filters,
+      statuses: normalizedStatuses,
+    }, options);
 
-    return dedupeReviewRecords(recordsByStatus.flat());
+    return dedupeReviewRecords(recordsByStatus);
   }
 
   return [];
 }
 
-export async function reviewReport(token, submissionOrPublicId, nextStatus, eventPublicIdArg, payload = {}) {
+export async function reviewReport(submissionOrPublicId, nextStatus, eventPublicIdArg, payload = {}) {
   const submission = typeof submissionOrPublicId === 'object' ? submissionOrPublicId : {};
   const eventPublicId = pickPublicId([
     submission.eventPublicId,
@@ -444,18 +466,18 @@ export async function reviewReport(token, submissionOrPublicId, nextStatus, even
 
   const normalizedStatus = normalizeReportStatus(nextStatus);
   if (normalizedStatus === 'accepted') {
-    return acceptReport(token, eventPublicId, publicId, payload);
+    return acceptReport(eventPublicId, publicId, payload);
   }
 
   if (normalizedStatus === 'refused') {
-    return refuseReport(token, eventPublicId, publicId);
+    return refuseReport(eventPublicId, publicId);
   }
 
   if (normalizedStatus === 'draft') {
-    return returnReportToDraft(token, eventPublicId, publicId);
+    return returnReportToDraft(eventPublicId, publicId);
   }
 
-  return submitReport(token, eventPublicId, publicId);
+  return submitReport(eventPublicId, publicId);
 }
 
 

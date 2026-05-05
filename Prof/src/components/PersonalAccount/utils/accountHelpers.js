@@ -16,6 +16,7 @@ export const DEFAULT_PROFILE_DATA = {
   course: 1,
   direction: '',
   id: '',
+  ldapId: '',
   email: '',
   phone: '',
 };

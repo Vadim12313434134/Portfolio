@@ -31,7 +31,7 @@ const ReportModal = ({
           <input
             value={reportText}
             onChange={(e) => setReportText(e.target.value)}
-            placeholder="https://telegra.ph/..."
+            placeholder="https://telegra.ph/"
             className={styles.reportTextarea}
           />
           <p className={styles.reportHint}>

@@ -11,22 +11,31 @@
 } from './backend/shared';
 
 export {
-  createUserProfile,
+  blockUserByLdapId,
   fetchCurrentUser,
+  fetchCurrentUserGoals,
+  fetchCurrentUserActivePeriodSummary,
+  fetchCurrentUserPeriodsSummary,
+  fetchCurrentUserSummary,
+  fetchUsers,
   fetchUserByLdapId,
   loginUser,
+  unblockUserByLdapId,
 } from './backend/users';
 
 export {
   cancelEnrollInEvent,
   cancelEvent,
   createEvent,
+  deleteEvent,
   enrollInEvent,
   fetchEventById,
   fetchEvents,
+  fetchEventsImportTemplate,
   fetchEventsList,
   fetchMyEvents,
   finishEvent,
+  importEventsFromCsv,
   publishEvent,
   searchEvents,
   updateEvent,
@@ -50,3 +59,21 @@ export {
   submitReport,
   updateReport,
 } from './backend/reports';
+
+export {
+  activateStudyPeriod,
+  archiveStudyPeriod,
+  createStudyPeriod,
+  deleteStudyPeriod,
+  fetchStudyPeriodByName,
+  fetchStudyPeriods,
+  updateStudyPeriod,
+} from './backend/periods';
+
+export {
+  createGoal,
+  fetchGoalsByFilters,
+  fetchStudentGoalByPeriodAndCourse,
+  fetchGoalByPublicId,
+  fetchGoals,
+} from './backend/goals';

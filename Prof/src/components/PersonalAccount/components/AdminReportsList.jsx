@@ -56,9 +56,9 @@ const AdminReportsList = ({
                 <button
                   type="button"
                   className={styles.rejectBtn}
-                  onClick={() => onReview(submission, 'rejected')}
+                  onClick={() => onReview(submission, 'refused')}
                 >
-                  Отклонить
+                  Отменить проверку
                 </button>
                 <button
                   type="button"

@@ -7,7 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '')
-  const API_PROXY_TARGET = env.VITE_API_PROXY_TARGET || 'http://10.3.34.152:8080'
+  const API_PROXY_TARGET = env.VITE_API_PROXY_TARGET || 'http://10.3.47.36:8081'
+  const DEV_STUB_COOKIE = String(env.VITE_STUB_COOKIE || '').trim()
+  const DEV_STUB_COOKIE_HEADER = String(env.VITE_STUB_COOKIE_HEADER || 'X-Stub-Cookie').trim()
 
   return {
     plugins: [react()],
@@ -32,6 +34,17 @@ export default defineConfig(({ mode }) => {
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq) => {
               proxyReq.removeHeader('origin')
+
+              if (!DEV_STUB_COOKIE) return
+
+              const requestCookieHeader = proxyReq.getHeader('cookie')
+              if (requestCookieHeader) return
+
+              const customStubCookieHeader = proxyReq.getHeader(DEV_STUB_COOKIE_HEADER)
+              const resolvedStubCookie = String(customStubCookieHeader || DEV_STUB_COOKIE).trim()
+              if (!resolvedStubCookie) return
+
+              proxyReq.setHeader('cookie', resolvedStubCookie)
             })
           },
         },

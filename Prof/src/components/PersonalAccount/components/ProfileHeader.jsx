@@ -10,9 +10,9 @@ const ProfileHeader = ({ profileData, initials }) => {
       <div className={styles.profileInfo}>
         <h2 className={styles.profileName}>{profileData.fullName || 'Пользователь'}</h2>
         <p className={styles.profileSpecialization}>{profileData.specialization}</p>
-        {profileData.firstName && profileData.lastName && (
+        {profileData.ldapId && (
           <p className={styles.profileDetails}>
-            {profileData.firstName} {profileData.lastName}
+            ldapId: {profileData.ldapId}
           </p>
         )}
       </div>

@@ -28,10 +28,6 @@ const ApplicationsSection = ({ userApplications, getStatusInfo }) => {
           );
         })}
       </div>
-
-      {userApplications.length > 3 && (
-        <button className={styles.showAllBtn}>Показать все заявки →</button>
-      )}
     </div>
   );
 };

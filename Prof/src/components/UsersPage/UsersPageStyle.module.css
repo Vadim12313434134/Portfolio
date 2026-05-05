@@ -1,0 +1,923 @@
+.appContainer {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  overflow-y: auto;
+}
+
+.headerCard,
+.listCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.headerCard {
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.periodActionButton {
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.periodActionButton:hover {
+  background: #1d4ed8;
+}
+
+.goalActionButton {
+  border: none;
+  border-radius: 10px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.goalActionButton:hover {
+  background: #0d5f58;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #111827;
+}
+
+.subtitle {
+  margin: 0.4rem 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.searchInput {
+  width: 260px;
+  max-width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.filtersRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #4f6af5;
+  box-shadow: 0 0 0 3px rgba(79, 106, 245, 0.15);
+}
+
+.filterSelect {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #4f6af5;
+  box-shadow: 0 0 0 3px rgba(79, 106, 245, 0.15);
+}
+
+.filterButton,
+.secondaryButton {
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filterButton {
+  background: #2563eb;
+  color: #fff;
+}
+
+.filterButton:hover {
+  background: #1d4ed8;
+}
+
+.secondaryButton {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.secondaryButton:hover {
+  background: #d1d5db;
+}
+
+.listCard {
+  padding: 1.2rem;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  color: #374151;
+}
+
+.listHeader h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.stateText {
+  margin: 1rem 0;
+  color: #6b7280;
+}
+
+.usersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.userCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.userMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.userNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.userName {
+  margin: 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+}
+
+.active {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.blocked {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.userMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.1rem;
+  color: #4b5563;
+  font-size: 0.86rem;
+}
+
+.blockButton {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.blockButton:hover {
+  background: #b91c1c;
+}
+
+.unblockButton {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  background: #15803d;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.unblockButton:hover {
+  background: #166534;
+}
+
+.disabledButton,
+.disabledButton:hover {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.paginationButton {
+  border: none;
+  border-radius: 10px;
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.paginationButton:hover {
+  background: #1f2937;
+}
+
+.paginationButton:disabled,
+.paginationButton:disabled:hover {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.paginationSummary {
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.periodModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.periodModal {
+  width: min(900px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+  padding: 1rem;
+}
+
+.periodModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.periodModalHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.periodModalClose {
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.periodModalClose:hover {
+  background: #e5e7eb;
+}
+
+.periodForm {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.periodLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.periodInput {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+.periodInput:focus {
+  outline: none;
+  border-color: #4f6af5;
+  box-shadow: 0 0 0 3px rgba(79, 106, 245, 0.15);
+}
+
+.periodDateRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.periodFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.periodsSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.9rem;
+}
+
+.periodsFiltersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.periodsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+  color: #374151;
+}
+
+.periodsHeader h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.periodsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.periodRow {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.periodMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.periodTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.periodName {
+  margin: 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.periodDates {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.periodEditForm {
+  margin-top: 0.45rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.periodStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.22rem 0.62rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.periodStatusActive {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.periodStatusArchived {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.periodStatusFinished {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.periodStatusPlanned {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.periodStatusDefault {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.periodControls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.periodControlButton,
+.periodControlButtonSecondary,
+.periodControlButtonDanger {
+  border: none;
+  border-radius: 9px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.periodControlButton {
+  background: #2563eb;
+}
+
+.periodControlButton:hover {
+  background: #1d4ed8;
+}
+
+.periodControlButtonSecondary {
+  background: #6b7280;
+}
+
+.periodControlButtonSecondary:hover {
+  background: #4b5563;
+}
+
+.periodControlButtonDanger {
+  background: #dc2626;
+}
+
+.periodControlButtonDanger:hover {
+  background: #b91c1c;
+}
+
+.periodControlButton:disabled,
+.periodControlButtonSecondary:disabled,
+.periodControlButtonDanger:disabled {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.periodPagination {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.goalModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.goalModal {
+  width: min(960px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+  padding: 1rem;
+}
+
+.goalModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.goalModalHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.goalModalClose {
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.goalModalClose:hover {
+  background: #e5e7eb;
+}
+
+.goalForm {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.goalCreateRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.goalLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.goalInput {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.goalInput:focus {
+  outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+}
+
+.goalFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.goalsSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.9rem;
+}
+
+.goalsFiltersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.goalsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+  color: #374151;
+}
+
+.goalsHeader h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.goalsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.goalRow {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.goalMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.goalTitle {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #111827;
+}
+
+.goalMeta {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.goalActions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.goalStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.22rem 0.62rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.goalStatusActive {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.goalStatusPlanned {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.goalStatusArchived {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.goalStatusDefault {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.goalDetailsButton {
+  border: none;
+  border-radius: 9px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.goalDetailsButton:hover {
+  background: #0d5f58;
+}
+
+.goalDetailsButton:disabled,
+.goalDetailsButton:disabled:hover {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.goalPagination {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.goalDetailsCard {
+  margin-top: 0.9rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.85rem;
+  background: #fafafa;
+}
+
+.goalDetailsCard h4 {
+  margin: 0 0 0.55rem 0;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.goalDetailsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.1rem;
+  color: #4b5563;
+  font-size: 0.87rem;
+}
+
+@media (max-width: 900px) {
+  .appContainer {
+    flex-direction: column;
+  }
+
+  .mainContent {
+    padding: 1.2rem;
+  }
+
+  .headerCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: flex-start;
+  }
+
+  .periodActionButton {
+    width: 100%;
+  }
+
+  .goalActionButton {
+    width: 100%;
+  }
+
+  .filtersRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchInput,
+  .filterSelect,
+  .filterButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .userCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .blockButton {
+    width: 100%;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .periodDateRow {
+    grid-template-columns: 1fr;
+  }
+
+  .goalCreateRow {
+    grid-template-columns: 1fr;
+  }
+
+  .periodFormActions {
+    flex-direction: column;
+  }
+
+  .goalFormActions {
+    flex-direction: column;
+  }
+
+  .periodRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .periodTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .periodEditForm {
+    grid-template-columns: 1fr;
+  }
+
+  .periodControls {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .periodControlButton,
+  .periodControlButtonSecondary,
+  .periodControlButtonDanger {
+    width: 100%;
+  }
+
+  .periodPagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .periodsFiltersRow {
+    flex-direction: column;
+  }
+
+  .goalsFiltersRow {
+    flex-direction: column;
+  }
+
+  .goalInput {
+    width: 100%;
+  }
+
+  .goalRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .goalActions {
+    justify-content: stretch;
+  }
+
+  .goalStatus,
+  .goalDetailsButton {
+    width: 100%;
+  }
+
+  .goalPagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

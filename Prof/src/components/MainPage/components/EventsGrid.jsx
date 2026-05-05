@@ -12,12 +12,25 @@ const EventsGrid = ({
   onPublishEvent,
   onFinishEvent,
   onCancelEvent,
+  onDeleteEvent,
   canManageEvent,
   viewMode = 'grid',
   onViewModeChange,
+  currentPage = 0,
+  totalPages = 1,
+  pageSize = 20,
+  onPageChange,
 }) => {
   const events = Array.isArray(filteredEvents) ? filteredEvents : [];
   const isListView = viewMode === 'list';
+  const currentPageSafe = Math.max(0, Number(currentPage) || 0);
+  const totalPagesSafe = Math.max(1, Number(totalPages) || 1);
+
+  const pageNumbers = Array.from({ length: totalPagesSafe }, (_, index) => index)
+    .filter((pageIndex) =>
+      pageIndex === 0
+      || pageIndex === totalPagesSafe - 1
+      || Math.abs(pageIndex - currentPageSafe) <= 1);
 
   const formatEventDate = (dateTime) => {
     if (!dateTime) return '';
@@ -189,12 +202,67 @@ const EventsGrid = ({
                       Отменить
                     </button>
                   )}
+                  {(event.status === 'FINISHED' || event.status === 'CANCELLED') && (
+                    <button
+                      type="button"
+                      className={styles.deleteEventBtn}
+                      onClick={() => onDeleteEvent?.(event)}
+                    >
+                      Удалить
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {totalPagesSafe > 1 && (
+        <div className={styles.pagination}>
+          <button
+            type="button"
+            className={styles.paginationButton}
+            onClick={() => onPageChange?.(currentPageSafe - 1)}
+            disabled={currentPageSafe <= 0}
+          >
+            Назад
+          </button>
+
+          <div className={styles.paginationPages}>
+            {pageNumbers.map((pageIndex, index) => {
+              const prevPage = pageNumbers[index - 1];
+              const showDots = typeof prevPage === 'number' && pageIndex - prevPage > 1;
+
+              return (
+                <div key={`page-wrapper-${pageIndex}`} className={styles.paginationPageSlot}>
+                  {showDots && <span className={styles.paginationDots}>...</span>}
+                  <button
+                    type="button"
+                    className={`${styles.paginationButton} ${pageIndex === currentPageSafe ? styles.paginationButtonActive : ''}`}
+                    onClick={() => onPageChange?.(pageIndex)}
+                  >
+                    {pageIndex + 1}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className={styles.paginationButton}
+            onClick={() => onPageChange?.(currentPageSafe + 1)}
+            disabled={currentPageSafe >= totalPagesSafe - 1}
+          >
+            Вперед
+          </button>
+
+          <span className={styles.paginationSummary}>
+            Страница {currentPageSafe + 1} из {totalPagesSafe}, по {pageSize} шт.
+          </span>
+        </div>
+      )}
     </div>
   );
 };

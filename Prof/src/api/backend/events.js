@@ -1,4 +1,4 @@
-﻿import { apiFetch } from '../apiClient';
+import { apiFetch, apiFetchBlob } from '../apiClient';
 import {
   ENDPOINTS,
   buildEventSearchBody,
@@ -16,11 +16,28 @@ import {
   normalizeParticipationRecord,
   toRuDate,
 } from './shared';
-export async function createEvent(token, payload) {
+
+const getFileNameFromDisposition = (contentDisposition, fallback = 'events-import-template.xlsx') => {
+  if (!contentDisposition || typeof contentDisposition !== 'string') return fallback;
+
+  const utf8Match = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1].trim().replace(/^["']|["']$/g, ''));
+    } catch {
+    }
+  }
+
+  const fileNameMatch = contentDisposition.match(/filename\s*=\s*([^;]+)/i);
+  if (!fileNameMatch?.[1]) return fallback;
+
+  const parsed = fileNameMatch[1].trim().replace(/^["']|["']$/g, '');
+  return parsed || fallback;
+};
+export async function createEvent(payload) {
   const requestedStatus = normalizeEventStatus(payload.status, 'DRAFT');
   const data = await apiFetch(ENDPOINTS.events, {
     method: 'POST',
-    token,
     body: cleanObject({
       title: payload.title,
       description: payload.description,
@@ -53,7 +70,7 @@ export async function createEvent(token, payload) {
 
   if (normalizeEventStatus(requestedStatus) === 'PUBLISHED' && createdStatus !== 'PUBLISHED' && normalized.publicId) {
     try {
-      const publishedEvent = await publishEvent(token, normalized.publicId);
+      const publishedEvent = await publishEvent(normalized.publicId);
       return cacheEventDetails({
         ...normalized,
         ...publishedEvent,
@@ -72,33 +89,31 @@ export async function createEvent(token, payload) {
   return cacheEventDetails(normalized);
 }
 
-export async function searchEvents(token, filters = {}, options = {}) {
+export async function searchEvents(filters = {}, options = {}) {
   const data = await apiFetch(ENDPOINTS.eventsSearch, {
     method: 'POST',
-    token,
     params: buildSearchParams(options),
     body: buildEventSearchBody(filters),
   });
   const events = getPagedContent(data).map((event) => mergeCachedEventDetails(normalizeEvent(event)));
-  return enrichEventsWithDetails(token, events, fetchEventById);
+  return enrichEventsWithDetails(events, fetchEventById);
 }
 
-export async function fetchEventsList(token) {
+export async function fetchEventsList() {
   const data = await apiFetch(ENDPOINTS.events, {
     method: 'GET',
-    token,
   });
   return getPagedContent(data).map((event) => mergeCachedEventDetails(normalizeEvent(event)));
 }
 
-export async function fetchEvents(token, filters = {}, options = {}) {
+export async function fetchEvents(filters = {}, options = {}) {
   const normalizedFilters = cleanObject({
     statuses: ['PUBLISHED'],
     ...filters,
   });
 
   try {
-    const publishedEvents = await searchEvents(token, normalizedFilters, options);
+    const publishedEvents = await searchEvents(normalizedFilters, options);
     return publishedEvents;
   } catch (error) {
     console.warn('Published events search failed:', error);
@@ -106,10 +121,9 @@ export async function fetchEvents(token, filters = {}, options = {}) {
   }
 }
 
-export async function fetchMyEvents(token, filters = {}, options = {}) {
+export async function fetchMyEvents(filters = {}, options = {}) {
   const data = await apiFetch(ENDPOINTS.myEventsSearch, {
     method: 'POST',
-    token,
     params: buildSearchParams(options),
     body: buildEventSearchBody(filters),
   });
@@ -136,21 +150,19 @@ export async function fetchMyEvents(token, filters = {}, options = {}) {
     });
   });
 
-  return enrichEventsWithDetails(token, events, fetchEventById);
+  return enrichEventsWithDetails(events, fetchEventById);
 }
 
-export async function fetchEventById(token, publicId) {
+export async function fetchEventById(publicId) {
   const data = await apiFetch(ENDPOINTS.eventById(publicId), {
     method: 'GET',
-    token,
   });
   return cacheEventDetails(normalizeEvent(getEventPayload(data)));
 }
 
-export async function updateEvent(token, publicId, payload) {
+export async function updateEvent(publicId, payload) {
   const data = await apiFetch(ENDPOINTS.eventById(publicId), {
     method: 'PATCH',
-    token,
     body: cleanObject({
       title: payload.title,
       description: payload.description,
@@ -177,8 +189,8 @@ export async function updateEvent(token, publicId, payload) {
   };
 }
 
-export async function publishEvent(token, publicId) {
-  const data = await apiFetch(ENDPOINTS.eventPublish(publicId), { method: 'PATCH', token });
+export async function publishEvent(publicId) {
+  const data = await apiFetch(ENDPOINTS.eventPublish(publicId), { method: 'PATCH' });
   const eventData = getEventPayload(data);
   const status = eventData.Status ?? eventData.status ?? 'PUBLISHED';
   return cacheEventDetails({
@@ -189,20 +201,58 @@ export async function publishEvent(token, publicId) {
   });
 }
 
-export async function finishEvent(token, publicId) {
-  const data = await apiFetch(ENDPOINTS.eventFinish(publicId), { method: 'PATCH', token });
+export async function finishEvent(publicId) {
+  const data = await apiFetch(ENDPOINTS.eventFinish(publicId), { method: 'PATCH' });
   return cacheEventDetails(normalizeEvent(getEventPayload(data)));
 }
 
-export async function cancelEvent(token, publicId) {
-  const data = await apiFetch(ENDPOINTS.eventCancel(publicId), { method: 'PATCH', token });
+export async function cancelEvent(publicId) {
+  const data = await apiFetch(ENDPOINTS.eventCancel(publicId), { method: 'PATCH' });
   return cacheEventDetails(normalizeEvent(getEventPayload(data)));
 }
 
-export async function enrollInEvent(token, publicId) {
-  const data = await apiFetch(ENDPOINTS.eventEnroll(publicId), {
+export async function deleteEvent(publicId) {
+  await apiFetch(ENDPOINTS.eventById(publicId), {
+    method: 'DELETE',
+  });
+
+  return { publicId, id: publicId };
+}
+
+export async function fetchEventsImportTemplate() {
+  const { blob, headers } = await apiFetchBlob(ENDPOINTS.eventsImportTemplate, {
+    method: 'GET',
+  });
+
+  const contentDisposition = headers?.['content-disposition'] ?? headers?.['Content-Disposition'] ?? '';
+  const contentType = headers?.['content-type'] ?? headers?.['Content-Type'] ?? blob.type ?? 'application/octet-stream';
+  const fileName = getFileNameFromDisposition(contentDisposition);
+
+  return {
+    blob,
+    fileName,
+    contentType,
+  };
+}
+
+export async function importEventsFromCsv(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return apiFetch(ENDPOINTS.eventsImportCsv, {
     method: 'POST',
-    token,
+    body: formData,
+  });
+}
+
+export async function enrollInEvent(publicId) {
+  const normalizedPublicId = String(publicId ?? '').trim();
+  if (!normalizedPublicId) {
+    throw new Error('Не удалось определить ID мероприятия для записи');
+  }
+
+  const data = await apiFetch(ENDPOINTS.eventEnroll(normalizedPublicId), {
+    method: 'POST',
   });
   const payload = getEventPayload(data);
   const hasEventPayload = Boolean(
@@ -215,19 +265,23 @@ export async function enrollInEvent(token, publicId) {
 
   if (payload && typeof payload === 'object' && hasEventPayload) {
     return cacheEventDetails(normalizeEvent({
-      publicId,
+      publicId: normalizedPublicId,
       ...payload,
       alreadyParticipation: true,
     }));
   }
 
-  return { publicId, id: publicId, alreadyParticipation: true };
+  return { publicId: normalizedPublicId, id: normalizedPublicId, alreadyParticipation: true };
 }
 
-export async function cancelEnrollInEvent(token, publicId) {
-  const data = await apiFetch(ENDPOINTS.eventCancelEnroll(publicId), {
+export async function cancelEnrollInEvent(publicId) {
+  const normalizedPublicId = String(publicId ?? '').trim();
+  if (!normalizedPublicId) {
+    throw new Error('Не удалось определить ID мероприятия для отмены записи');
+  }
+
+  const data = await apiFetch(ENDPOINTS.eventCancelEnroll(normalizedPublicId), {
     method: 'DELETE',
-    token,
   });
   const payload = getEventPayload(data);
   const hasEventPayload = Boolean(
@@ -240,13 +294,15 @@ export async function cancelEnrollInEvent(token, publicId) {
 
   if (payload && typeof payload === 'object' && hasEventPayload) {
     return cacheEventDetails(normalizeEvent({
-      publicId,
+      publicId: normalizedPublicId,
       ...payload,
       alreadyParticipation: false,
     }));
   }
 
-  return { publicId, id: publicId, alreadyParticipation: false };
+  return { publicId: normalizedPublicId, id: normalizedPublicId, alreadyParticipation: false };
 }
+
+
 
 

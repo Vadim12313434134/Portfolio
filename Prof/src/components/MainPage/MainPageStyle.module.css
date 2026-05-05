@@ -1,4 +1,4 @@
-/* Переменные */
+﻿
 :root {
   --primary: #9605CA;
   --primary-dark: #8102af;
@@ -20,7 +20,6 @@
   --radius-md: 0.75rem;
 }
 
-/* Глобальные стили */
 * {
   margin: 0;
   padding: 0;
@@ -28,12 +27,11 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
   background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
   color: var(--gray-800);
 }
 
-/* Основной контейнер */
+
 .appContainer {
   display: flex;
   min-height: 100vh;
@@ -53,7 +51,7 @@ body {
   font-size: 1rem;
 }
 
-/* Информация о преподавателе */
+
 .teacherInfo {
   display: flex;
   align-items: center;
@@ -66,7 +64,7 @@ body {
   border-bottom: 1px solid var(--gray-100);
 }
 
-/* Статус заявки на карточке мероприятия */
+
 .applicationStatus {
   display: flex;
   align-items: center;
@@ -94,7 +92,7 @@ body {
   color: #dc2626;
 }
 
-/* Секция с заявками */
+
 .applicationsSection {
   margin-top: 2rem;
 }
@@ -123,7 +121,6 @@ body {
 }
 
 .applicationCard:hover {
-  transform: translateX(4px);
   border-color: var(--primary-light);
   box-shadow: var(--shadow-sm);
 }
@@ -147,7 +144,7 @@ body {
 
 .applicationPoints {
   font-weight: 600;
-  color: var(--primary);
+  color: #4F6AF5;
   font-size: 0.875rem;
 }
 
@@ -165,7 +162,7 @@ body {
   margin-top: 1rem;
   background: none;
   border: none;
-  color: var(--primary);
+  color: #4F6AF5;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -178,7 +175,7 @@ body {
   text-decoration: underline;
 }
 
-/* Разные типы toast */
+
 .toast.success {
   background: #059669;
 }
@@ -192,14 +189,14 @@ body {
 }
 
 
-/* Основной контент */
+
 .mainContent {
   flex: 1;
   padding: 2rem 2.5rem;
   overflow-y: auto;
 }
 
-/* Приветственная секция */
+
 .welcomeSection h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -215,7 +212,7 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Обёртка для двух блоков (flex-контейнер) */
+
 .statsWrapper {
   display: flex;
   gap: 1.5rem;
@@ -223,7 +220,7 @@ body {
   flex-wrap: wrap;
 }
 
-/* Блок "Ваши баллы" */
+
 .pointsCard {
   flex: 1;
   background: white;
@@ -235,11 +232,6 @@ body {
   text-align: center;
 }
 
-.pointsCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
 .pointsHeader {
   display: flex;
   align-items: center;
@@ -249,7 +241,7 @@ body {
 }
 
 .pointsHeader svg {
-  color: var(--primary);
+  color: #4F6AF5;
   stroke: var(--primary);
 }
 
@@ -294,7 +286,7 @@ body {
   transform: scale(0.98);
 }
 
-/* Блок "Достижение цели" */
+
 .goalCard {
   flex: 1;
   background: white;
@@ -303,11 +295,6 @@ body {
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-200);
   transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.goalCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
 }
 
 .goalHeader {
@@ -382,30 +369,6 @@ body {
   font-weight: 500;
   text-align: center;
   padding-top: 0.5rem;
-}
-
-.adminSummaryText {
-  font-size: 0.95rem;
-  color: var(--gray-600);
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.adminCreateInlineBtn {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--primary);
-  color: white;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.adminCreateInlineBtn:hover {
-  background: var(--primary-dark);
 }
 
 .adminCreatedList {
@@ -565,6 +528,19 @@ body {
   gap: 0.625rem;
 }
 
+.adminFieldLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-top: 0.125rem;
+}
+
+.adminFieldHint {
+  margin: -0.25rem 0 0.125rem;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
 .adminInput {
   width: 100%;
   padding: 0.625rem 0.75rem;
@@ -575,7 +551,7 @@ body {
 }
 
 .adminInput:focus {
-  border-color: var(--primary);
+  border-color: #4F6AF5;
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
@@ -599,7 +575,7 @@ body {
   background: var(--primary-dark);
 }
 
-/* Секция мероприятий */
+
 .eventsSection h2 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -624,14 +600,13 @@ body {
 }
 
 .eventCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary-light);
 }
 
 .registered {
   background: var(--primary-light);
-  border-color: var(--primary);
+  border-color: #4F6AF5;
 }
 
 .eventHeader {
@@ -649,7 +624,7 @@ body {
 
 .eventPointsBadge {
   background: var(--primary-light);
-  color: var(--primary);
+  color: #4F6AF5;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -719,7 +694,7 @@ body {
   opacity: 0.7;
 }
 
-/* Toast уведомление */
+
 .toast {
   position: fixed;
   bottom: 2rem;
@@ -735,7 +710,7 @@ body {
   animation: slideIn 0.2s ease;
 }
 
-/* Секция поиска и фильтров */
+
 .searchFilterSection {
   margin-bottom: 2rem;
   background: white;
@@ -758,7 +733,7 @@ body {
 }
 
 .searchBar:focus-within {
-  border-color: var(--primary);
+  border-color: #4F6AF5;
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
@@ -799,7 +774,7 @@ body {
 }
 
 .filterSelect:hover {
-  border-color: var(--primary);
+  border-color: #4F6AF5;
 }
 
 .clearFiltersBtn {
@@ -818,7 +793,7 @@ body {
   color: var(--danger);
 }
 
-/* Теги на карточке мероприятия */
+
 .tags {
   display: flex;
   gap: 0.5rem;
@@ -828,7 +803,7 @@ body {
 
 .tagDirection {
   background: var(--primary-light);
-  color: var(--primary);
+  color: #4F6AF5;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.7rem;
@@ -844,7 +819,7 @@ body {
   font-weight: 600;
 }
 
-/* Сообщение об отсутствии результатов */
+
 .noResults {
   text-align: center;
   padding: 3rem;
@@ -865,7 +840,56 @@ body {
   color: var(--gray-500);
 }
 
-/* Кнопка создания мероприятия на главной странице */
+
+.adminCreateWrap {
+  display: flex;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.adminCreateCard {
+  width: 100%;
+  flex: 1 1 100%;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.adminCreateCard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.adminCreateHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.adminCreateHeader svg {
+  color: var(--warning);
+  stroke: var(--warning);
+}
+
+.adminCreateHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.adminCreateBadge {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  background: var(--gray-100);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
 .adminCreateInlineBtn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -881,7 +905,6 @@ body {
 }
 
 .adminCreateInlineBtn:hover {
-  transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
@@ -889,18 +912,42 @@ body {
   transform: translateY(0);
 }
 
-/* Стили для карточек админа на главной */
+.adminSecondaryInlineBtn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #9605CA;
+  border-radius: 12px;
+  background: white;
+  color: #9605CA;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.adminSecondaryInlineBtn:hover:not(:disabled) {
+  background: #f3e8ff;
+  border-color: #8102af;
+  color: #8102af;
+}
+
+.adminSecondaryInlineBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+
 .goalCard {
   background: white;
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.goalCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .goalHeader {
@@ -941,7 +988,7 @@ body {
   margin-bottom: 32px;
 }
 
-/* Секция мероприятий */
+
 .eventsSection {
   margin-top: 32px;
 }
@@ -1026,7 +1073,68 @@ body {
   gap: 16px;
 }
 
-/* Карточка мероприятия */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paginationPages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paginationPageSlot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paginationButton {
+  border: 1px solid var(--gray-200);
+  background: white;
+  color: var(--gray-800);
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  border-color: #4F6AF5;
+  color: #4F6AF5;
+}
+
+.paginationButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.paginationButtonActive {
+  background: var(--primary);
+  border-color: #4F6AF5;
+  color: white;
+}
+
+.paginationButtonActive:hover {
+  color: white;
+}
+
+.paginationDots {
+  color: var(--gray-600);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.paginationSummary {
+  color: var(--gray-600);
+  font-size: 13px;
+}
+
+
 .eventCard {
   background: white;
   border-radius: var(--radius-lg);
@@ -1040,7 +1148,6 @@ body {
 }
 
 .eventCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--primary-light);
 }
@@ -1057,7 +1164,7 @@ body {
 }
 
 .eventCardList:hover {
-  transform: translateX(4px);
+  transform: none;
 }
 
 .eventCardList .eventHeader {
@@ -1163,7 +1270,7 @@ body {
 .detailItem svg {
   width: 16px;
   height: 16px;
-  color: var(--primary);
+  color: #4F6AF5;
   flex-shrink: 0;
 }
 
@@ -1181,11 +1288,11 @@ body {
 .teacherInfo svg {
   width: 14px;
   height: 14px;
-  color: var(--primary);
+  color: #4F6AF5;
   flex-shrink: 0;
 }
 
-/* Бейджи статусов */
+
 .statusBadge {
   display: inline-flex;
   align-items: center;
@@ -1255,7 +1362,7 @@ body {
   gap: 4px;
 }
 
-/* Кнопки */
+
 .registerButton {
   background: var(--primary);
   color: white;
@@ -1345,6 +1452,21 @@ body {
   background: #dc2626;
 }
 
+.deleteEventBtn {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deleteEventBtn:hover {
+  background: #000;
+}
+
 .editBtn {
   background: #2196f3;
   color: white;
@@ -1362,7 +1484,7 @@ body {
 
 
 
-/* Пустое состояние */
+
 .noEvents {
   text-align: center;
   padding: 60px 20px;
@@ -1387,7 +1509,7 @@ body {
   background: #5a67d8;
 }
 
-/* Кнопка наверх */
+
 .scrollTopBtn {
   position: fixed;
   bottom: 30px;
@@ -1406,12 +1528,44 @@ body {
 }
 
 .scrollTopBtn:hover {
-  transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* Адаптив для мобильных */
+
 @media (max-width: 768px) {
+  .adminCreateWrap {
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+
+  .adminCreateCard {
+    max-width: 100%;
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .adminCreateHeader h3 {
+    font-size: 1.05rem;
+  }
+
+  .adminSummaryText {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-bottom: 12px;
+  }
+
+  .adminCreateInlineBtn {
+    margin-top: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .adminSecondaryInlineBtn {
+    margin-top: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
   .eventsGrid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -1443,6 +1597,15 @@ body {
     flex: 1;
   }
 
+  .pagination {
+    justify-content: center;
+  }
+
+  .paginationSummary {
+    width: 100%;
+    text-align: center;
+  }
+
   .eventCardList {
     display: flex;
     flex-direction: column;
@@ -1450,7 +1613,7 @@ body {
   }
 
   .eventCardList:hover {
-    transform: translateY(-2px);
+    transform: none;
   }
 
   .eventCardList .registerButton,
@@ -1469,6 +1632,34 @@ body {
 }
 
 @media (max-width: 480px) {
+  .adminCreateCard {
+    padding: 0.875rem;
+    border-radius: 12px;
+  }
+
+  .adminCreateHeader {
+    margin-bottom: 0.5rem;
+  }
+
+  .adminCreateHeader h3 {
+    font-size: 1rem;
+  }
+
+  .adminCreateBadge {
+    font-size: 0.8125rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .adminCreateInlineBtn {
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+
+  .adminSecondaryInlineBtn {
+    padding: 10px 11px;
+    font-size: 12px;
+  }
+
   .eventDetails {
     flex-direction: column;
   }
@@ -1486,7 +1677,7 @@ body {
   }
 }
 
-/* Адаптивность для поиска */
+
 @media (max-width: 768px) {
   .searchFilterSection {
     padding: 1rem;
@@ -1519,7 +1710,7 @@ body {
   }
 }
 
-/* Адаптивность */
+
 @media (max-width: 768px) {
   .appContainer {
     flex-direction: column;
@@ -1548,3 +1739,5 @@ body {
     justify-content: space-between;
   }
 }
+
+

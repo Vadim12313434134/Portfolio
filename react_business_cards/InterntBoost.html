@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speed Boost — Internet Accelerator</title>
+  <style>
+    :root{
+      --bg:#030303;
+      --card:#101010;
+      --card2:#171717;
+      --text:#f7f7f7;
+      --muted:#a8a8a8;
+      --red:#ff2a2a;
+      --red2:#c70e0e;
+      --line:rgba(255,255,255,.12);
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:#050505;color:var(--text);font-family:Inter,Arial,sans-serif;line-height:1.45}
+    a{text-decoration:none;color:inherit}
+    .wrap{width:min(100% - 36px,var(--max));margin:0 auto}
+    .red{color:var(--red)}
+
+    header{position:sticky;top:0;z-index:10;background:rgba(0,0,0,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .logo{display:flex;gap:10px;align-items:center;font-weight:900;line-height:1;flex-shrink:0}
+    .bolt{font-size:34px;color:var(--red)}
+    .logo span{display:block}.logo b{color:var(--red)}
+    .links{display:flex;gap:30px;font-size:13px;color:#ddd}
+    .actions{display:flex;gap:12px;align-items:center;flex-shrink:0}
+    .lang{background:#080808;border:1px solid var(--line);color:#fff;border-radius:6px;padding:10px 16px;cursor:pointer}
+    .menu{display:none;font-size:28px}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:6px;border:1px solid transparent;font-weight:800;min-height:48px;padding:0 24px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;cursor:pointer;text-align:center}
+    .btn.dark{background:#070707;border-color:var(--line)}
+
+    section{padding:54px 0}
+    .hero{position:relative;overflow:hidden;padding:86px 0 42px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 75% 35%,rgba(255,42,42,.18),transparent 34%),linear-gradient(180deg,#050505,#080808)}
+    .hero:after{content:"";position:absolute;right:7%;top:130px;width:460px;height:160px;background:linear-gradient(90deg,transparent,rgba(255,42,42,.45),transparent);filter:blur(22px);transform:skewY(-10deg);opacity:.75}
+    .hero-content{position:relative;z-index:1;max-width:620px}
+    .eyebrow{color:var(--red);font-weight:900;text-transform:uppercase;font-size:15px;margin-bottom:18px}
+    .hero h1{font-size:clamp(42px,7vw,72px);line-height:1.03;margin:0 0 24px;letter-spacing:-.05em}
+    .hero p{color:#ccc;font-size:18px;max-width:520px;margin:0}
+    .hero-actions{display:flex;gap:14px;margin:34px 0 26px}
+    .badges{display:flex;gap:28px;flex-wrap:wrap;color:#ddd;font-size:14px}
+    .badges span:before{content:"◉";color:var(--red);margin-right:8px}
+
+    .features{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;border-bottom:1px solid var(--line);padding-bottom:38px}
+    .feature{display:grid;grid-template-columns:58px 1fr;gap:16px;align-items:start}
+    .ico{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#151515;color:var(--red);font-size:24px}
+    .feature h3,.card h3{margin:0 0 8px;font-size:19px}
+    .muted{color:var(--muted);margin:0}
+
+    .center{text-align:center}
+    .center h2{font-size:34px;margin:0 0 8px}
+    .center p{color:var(--red);font-weight:800;margin:0}
+
+    .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:900px;margin:30px auto 0}
+    .card{background:linear-gradient(160deg,#121212,#080808);border:1px solid var(--line);border-radius:10px;padding:32px;position:relative}
+    .card.pop{border-color:var(--red)}
+    .popular{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--red);border-radius:4px;padding:5px 14px;font-size:11px;font-weight:900;white-space:nowrap}
+    .price{font-size:48px;font-weight:900;margin:22px 0}
+    .price small{font-size:14px;color:#ccc;font-weight:500}
+    .list{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:12px;color:#ddd}
+    .list li:before{content:"●";color:var(--red);margin-right:9px;font-size:12px}
+
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:760px;margin:22px auto 0;text-align:center}
+    .num{width:44px;height:44px;border-radius:50%;margin:0 auto 12px;border:1px solid var(--red);display:grid;place-items:center;color:var(--red);font-weight:900}
+    .step .big{font-size:40px;line-height:1}
+
+    .bonus{border:1px solid var(--line);border-radius:10px;padding:38px 70px;display:grid;grid-template-columns:210px 1fr;gap:50px;align-items:center;background:linear-gradient(135deg,#111,#070707);max-width:1050px;margin:0 auto}
+    .gift{font-size:96px;text-align:center}
+    .bonus h2{font-size:32px;line-height:1.15;margin:0 0 12px}
+
+    .faq{max-width:1000px;margin:20px auto 0;display:grid;gap:8px}
+    .faq details{background:#111;border:1px solid #1c1c1c;border-radius:5px;padding:14px 18px;color:#ddd}
+    .faq summary{cursor:pointer;font-weight:700}
+    .faq p{margin:10px 0 0}
+
+    .final{border:1px solid var(--red);border-radius:10px;background:linear-gradient(90deg,rgba(255,42,42,.22),rgba(255,42,42,.04));padding:34px 54px;display:grid;grid-template-columns:1fr 1fr auto;gap:30px;align-items:center}
+    .final h2{margin:0;font-size:31px;line-height:1.15}
+    .final ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+    .final li:before{content:"●";color:var(--red);margin-right:8px}
+
+    footer{padding:44px 0 26px}
+    .foot{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:50px;color:#aaa}
+    .foot h4{color:#fff;margin:0 0 14px}
+    .foot a{display:block;margin:9px 0;color:#aaa}
+    .copy{text-align:center;color:#777;font-size:13px;margin-top:30px}
+
+    [data-ru]{display:none!important}
+    body.ru [data-en]{display:none!important}
+    body.ru [data-ru]{display:revert!important}
+    body.ru .links[data-ru]{display:flex!important}
+    body:not(.ru) .links[data-ru]{display:none!important}
+
+    @media(max-width:900px){
+      .wrap{width:min(100% - 28px,430px)}
+      .links{display:none!important}
+      body.ru .links[data-ru]{display:none!important}
+      .menu{display:block}
+      .nav{height:72px}
+      .actions{gap:8px}
+      .actions .btn{padding:0 14px;font-size:12px;min-height:42px}
+      .lang{padding:9px 13px}
+      .hero{padding:42px 0 28px;background:linear-gradient(180deg,#050505,#080808)}
+      .hero:after{display:none}
+      .hero h1{font-size:35px}
+      .hero p{font-size:14px}
+      .hero-actions{display:grid}
+      .btn{width:100%}
+      .badges{font-size:11px;gap:12px;justify-content:center}
+      .features,.pricing,.steps,.bonus,.final,.foot{grid-template-columns:1fr}
+      .features{gap:18px}
+      .feature{grid-template-columns:54px 1fr}
+      .pricing{gap:14px}
+      .card{padding:22px}
+      .price{font-size:36px}
+      .bonus{padding:24px;gap:10px;text-align:left}
+      .gift{font-size:78px;text-align:left}
+      .final{padding:24px;gap:18px}
+      .final h2{font-size:22px}
+      .foot{gap:12px}
+      .foot .col{border-bottom:1px solid var(--line);padding-bottom:10px}
+      .center h2{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="logo" href="#">
+        <i class="bolt">ϟ</i><span>SPEED<br><b>BOOST</b></span>
+      </a>
+      <nav class="links" data-en>
+        <a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#how">How it works</a><a href="#ref">Referral</a><a href="#faq">FAQ</a>
+      </nav>
+      <nav class="links" data-ru>
+        <a href="#features">Плюсы</a><a href="#pricing">Тарифы</a><a href="#how">Как работает</a><a href="#ref">Бонус</a><a href="#faq">FAQ</a>
+      </nav>
+      <div class="actions">
+        <button class="lang" id="lang" type="button">EN</button>
+        <a class="btn" href="https://t.me/your_bot" data-en>Start Trial ↗</a>
+        <a class="btn" href="https://t.me/your_bot" data-ru>Триал ↗</a>
+        <span class="menu">☰</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-content">
+          <div class="eyebrow" data-en>Faster. Stable. Secure.</div>
+          <div class="eyebrow" data-ru>Быстрее. Стабильнее. Безопаснее.</div>
+          <h1 data-en>Speed Up Your <span class="red">Internet.</span> Instantly.</h1>
+          <h1 data-ru>Ускорьте свой <span class="red">интернет.</span> Мгновенно.</h1>
+          <p data-en>Our service makes your connection faster, more stable and more reliable for everything you do online.</p>
+          <p data-ru>Сервис помогает сделать соединение быстрее, стабильнее и удобнее для ежедневного использования.</p>
+          <div class="hero-actions">
+            <a class="btn" href="https://t.me/your_bot" data-en>↗ Start 3-Day Free Trial</a>
+            <a class="btn" href="https://t.me/your_bot" data-ru>↗ Запустить 3 дня бесплатно</a>
+            <a class="btn dark" href="#how" data-en>▷ How it works</a>
+            <a class="btn dark" href="#how" data-ru>▷ Как это работает</a>
+          </div>
+          <div class="badges" data-en><span>3-Day Free Trial</span><span>Cancel Anytime</span><span>No Hidden Fees</span></div>
+          <div class="badges" data-ru><span>3 дня бесплатно</span><span>Отмена в любой момент</span><span>Без скрытых платежей</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap features">
+        <div class="feature"><div class="ico">🛡</div><div><h3 data-en>Blazing Fast</h3><h3 data-ru>Очень быстро</h3><p class="muted" data-en>Optimized routing for maximum speed</p><p class="muted" data-ru>Оптимизированный маршрут для скорости</p></div></div>
+        <div class="feature"><div class="ico">ϟ</div><div><h3 data-en>Stable Connection</h3><h3 data-ru>Стабильное соединение</h3><p class="muted" data-en>No more ping spikes or random drops</p><p class="muted" data-ru>Меньше скачков пинга и обрывов</p></div></div>
+        <div class="feature"><div class="ico">◎</div><div><h3 data-en>Global Network</h3><h3 data-ru>Глобальная сеть</h3><p class="muted" data-en>Servers in multiple countries</p><p class="muted" data-ru>Серверы в разных странах</p></div></div>
+        <div class="feature"><div class="ico">🔒</div><div><h3 data-en>Secure & Private</h3><h3 data-ru>Безопасно</h3><p class="muted" data-en>Your data is encrypted and protected</p><p class="muted" data-ru>Данные защищены и зашифрованы</p></div></div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap">
+        <div class="center"><h2 data-en>Choose Your Plan</h2><h2 data-ru>Выберите тариф</h2><p data-en>All plans include 3-day free trial</p><p data-ru>Во всех тарифах есть 3 дня бесплатно</p></div>
+        <div class="pricing">
+          <article class="card"><h3>Social Boost</h3><p class="muted" data-en>Perfect for social media and browsing</p><p class="muted" data-ru>Для соцсетей и браузинга</p><div class="price">$3 <small>/month</small></div><ul class="list"><li data-en>Faster social apps</li><li data-ru>Быстрее соцсети</li><li data-en>Stable connection</li><li data-ru>Стабильное соединение</li><li data-en>Worldwide servers</li><li data-ru>Серверы по миру</li><li data-en>3-Day Free Trial</li><li data-ru>3 дня бесплатно</li></ul><a class="btn" href="https://t.me/your_bot" data-en>↗ Start Trial</a><a class="btn" href="https://t.me/your_bot" data-ru>↗ Начать триал</a></article>
+          <article class="card pop"><div class="popular" data-en>MOST POPULAR</div><div class="popular" data-ru>ПОПУЛЯРНЫЙ</div><h3>Gaming</h3><p class="muted" data-en>Low ping. Zero lag. Game on.</p><p class="muted" data-ru>Низкий пинг. Меньше лагов.</p><div class="price">$4 <small>/month</small></div><ul class="list"><li data-en>Optimized for games</li><li data-ru>Оптимизация для игр</li><li data-en>Ultra-low ping</li><li data-ru>Низкий пинг</li><li data-en>Stable connection</li><li data-ru>Стабильное соединение</li><li data-en>3-Day Free Trial</li><li data-ru>3 дня бесплатно</li></ul><a class="btn" href="https://t.me/your_bot" data-en>↗ Start Trial</a><a class="btn" href="https://t.me/your_bot" data-ru>↗ Начать триал</a></article>
+          <article class="card"><h3>Full Access</h3><p class="muted" data-en>Everything. Everywhere. No limits.</p><p class="muted" data-ru>Всё включено. Без лимитов.</p><div class="price">$5 <small>/month</small></div><ul class="list"><li data-en>All features included</li><li data-ru>Все функции</li><li data-en>Global network</li><li data-ru>Глобальная сеть</li><li data-en>Priority support</li><li data-ru>Приоритетная поддержка</li><li data-en>3-Day Free Trial</li><li data-ru>3 дня бесплатно</li></ul><a class="btn" href="https://t.me/your_bot" data-en>↗ Start Trial</a><a class="btn" href="https://t.me/your_bot" data-ru>↗ Начать триал</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap"><div class="center"><h2 data-en>How It Works</h2><h2 data-ru>Как это работает</h2></div><div class="steps"><div class="step"><div class="num">1</div><div class="big">✈</div><h3 data-en>Start in Telegram</h3><h3 data-ru>Запуск в Telegram</h3><p class="muted" data-en>Click the button and open our bot</p><p class="muted" data-ru>Нажмите кнопку и откройте бота</p></div><div class="step"><div class="num">2</div><div class="big">ϟ</div><h3 data-en>Choose Your Plan</h3><h3 data-ru>Выберите тариф</h3><p class="muted" data-en>Pick a plan that fits your needs</p><p class="muted" data-ru>Подберите нужный тариф</p></div><div class="step"><div class="num">3</div><div class="big">✓</div><h3 data-en>Activate & Enjoy</h3><h3 data-ru>Активируйте доступ</h3><p class="muted" data-en>Start your trial and enjoy faster internet</p><p class="muted" data-ru>Запустите триал и пользуйтесь</p></div></div></div>
+    </section>
+
+    <section id="ref"><div class="wrap"><div class="bonus"><div class="gift">🎁</div><div><h2 data-en>Invite 3 Friends<br>Get 7 Days Free</h2><h2 data-ru>Пригласите 3 друзей<br>Получите 7 дней бесплатно</h2><p class="muted" data-en>Share your link with friends. When 3 friends join — you get 7 days free on any plan.</p><p class="muted" data-ru>Поделитесь ссылкой. Когда 3 друга подключатся — получите 7 дней бесплатно.</p><br><a class="btn" href="https://t.me/your_bot" data-en>Learn More in Bot ↗</a><a class="btn" href="https://t.me/your_bot" data-ru>Подробнее в боте ↗</a></div></div></div></section>
+
+    <section id="faq"><div class="wrap"><div class="center"><h2>Frequently Asked Questions</h2></div><div class="faq"><details><summary>Is there a free trial?</summary><p class="muted">Yes, 3 days free.</p></details><details><summary>Can I cancel anytime?</summary><p class="muted">Yes, anytime.</p></details><details><summary>What payment methods do you accept?</summary><p class="muted">Payments are handled in Telegram bot.</p></details><details><summary>Will this work for gaming?</summary><p class="muted">Choose Gaming plan for the best experience.</p></details><details><summary>Is my data safe?</summary><p class="muted">The service uses protected encrypted access.</p></details></div></div></section>
+
+    <section><div class="wrap final"><h2 data-en>Ready to Speed Up<br>Your Internet?</h2><h2 data-ru>Готовы ускорить<br>интернет?</h2><ul><li data-en>3-Day Free Trial</li><li data-ru>3 дня бесплатно</li><li data-en>Cancel Anytime</li><li data-ru>Отмена в любой момент</li></ul><a class="btn" href="https://t.me/your_bot" data-en>↗ Start Your 3-Day Trial</a><a class="btn" href="https://t.me/your_bot" data-ru>↗ Запустить триал</a></div></section>
+  </main>
+
+  <footer><div class="wrap foot"><div><a class="logo"><i class="bolt">ϟ</i><span>SPEED<br><b>BOOST</b></span></a><p>Speed up your internet.<br>Stay ahead online.</p></div><div class="col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#how">How it works</a><a href="#ref">Referral</a><a href="#faq">FAQ</a></div><div class="col"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Disclaimer</a></div><div class="col"><h4>Support</h4><a href="#">Support</a></div></div><div class="copy">© 2026 Speed Boost. All rights reserved.</div></footer>
+
+  <script>
+    const btn = document.getElementById('lang');
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('ru');
+      const isRu = document.body.classList.contains('ru');
+      btn.textContent = isRu ? 'RU' : 'EN';
+      document.documentElement.lang = isRu ? 'ru' : 'en';
+    });
+  </script>
+</body>
+</html>

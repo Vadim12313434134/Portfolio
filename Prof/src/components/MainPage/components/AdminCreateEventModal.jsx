@@ -84,14 +84,21 @@ const AdminCreateEventModal = ({
             required
           />
 
+          <label className={styles.adminFieldLabel} htmlFor="event-datetime">
+            Дата и время
+          </label>
           <input
             className={styles.adminInput}
             type="datetime-local"
+            id="event-datetime"
             name="date"
             value={newEventData.date || ''}
             onChange={onChange}
             required
           />
+          <p className={styles.adminFieldHint}>
+            В календаре справа выбирается колонка «Время».
+          </p>
 
           <input
             className={styles.adminInput}

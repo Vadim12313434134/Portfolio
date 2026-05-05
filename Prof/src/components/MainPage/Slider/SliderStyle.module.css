@@ -1,4 +1,4 @@
-/* Слайдер секция */
+﻿
 .sliderSection {
   margin-bottom: 2rem;
 }
@@ -38,7 +38,6 @@
 }
 
 .slideCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--primary-light);
 }
@@ -166,7 +165,7 @@
   opacity: 0.7;
 }
 
-/* Стрелки слайдера */
+
 .sliderArrow {
   background: white;
   border: 1px solid var(--gray-200);
@@ -198,7 +197,7 @@
   right: 0;
 }
 
-/* Индикаторы слайдов */
+
 .sliderDots {
   display: flex;
   justify-content: center;
@@ -228,7 +227,7 @@
   background: var(--primary);
 }
 
-/* Адаптивность для слайдера */
+
 @media (max-width: 768px) {
   .sliderArrow {
     width: 36px;
@@ -281,3 +280,4 @@
     font-size: 0.813rem;
   }
 }
+

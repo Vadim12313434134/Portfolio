@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './PersonalAccountStyle.module.css';
 import Logo from './png/Logo.png';
 import AppSidebar from '../Common/AppSidebar';
-import { useNavigate } from 'react-router-dom';
 import ProfileHeader from './components/ProfileHeader';
 import StatsSection from './components/StatsSection';
 import MyEventsList from './components/MyEventsList';
 import ReportModal from './components/ReportModal';
 import AccountInfoCards from './components/AccountInfoCards';
-import AdminEventsList from './components/AdminEventsList';
 import AdminReportsList from './components/AdminReportsList';
 import AdminSummaryCards from './components/AdminSummaryCards';
 import AdminCreateEventModal from '../MainPage/components/AdminCreateEventModal';
@@ -18,8 +16,14 @@ import {
   createEvent,
   EVENT_MANAGEMENT_STATUSES,
   fetchAdminPendingReports,
-  fetchCurrentUser,
+  fetchCurrentUserGoals,
+  fetchCurrentUserActivePeriodSummary,
+  fetchCurrentUserPeriodsSummary,
+  fetchCurrentUserSummary,
   fetchEvents,
+  fetchEventsImportTemplate,
+  importEventsFromCsv,
+  fetchMyEvents,
   fetchMyRegisteredEvents,
   finishEvent,
   isTeacherProfile,
@@ -30,11 +34,8 @@ import {
   updateEvent,
 } from '../../api/backendApi';
 import {
-  clearAuthSession,
-  getAuthToken,
   getStoredAuthUser,
   saveAuthSession,
-  saveProfileSetupSession,
 } from '../../api/session';
 import {
   DEFAULT_PROFILE_DATA,
@@ -48,46 +49,93 @@ import {
   getUserOwnerIds,
 } from './utils/accountHelpers';
 
+const hasAdminAccess = (user = {}) =>
+  ['admin', 'moderator'].includes(String(user?.accessLevel ?? '').trim().toLowerCase())
+  || ['admin', 'moderator'].includes(String(user?.role ?? '').trim().toLowerCase());
+
+const getSpecializationTextByUser = (user = {}) => {
+  if (hasAdminAccess(user)) return '\u0410\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 \u043c\u0435\u0440\u043e\u043f\u0440\u0438\u044f\u0442\u0438\u0439';
+  if (isTeacherProfile(user)) return '\u041f\u0440\u0435\u043f\u043e\u0434\u0430\u0432\u0430\u0442\u0435\u043b\u044c';
+  return '\u0421\u0442\u0443\u0434\u0435\u043d\u0442';
+};
+
+const toProfileData = (user) => {
+  if (!user) return DEFAULT_PROFILE_DATA;
+
+  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+  const displayName = fullName || user.login || '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c';
+
+  return {
+    id: String(user.id ?? ''),
+    ldapId: String(user.id ?? user.ldapId ?? ''),
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    fullName: displayName,
+    course: user.course !== null && user.course !== undefined ? user.course : null,
+    direction: user.direction || '',
+    specialization: getSpecializationTextByUser(user),
+    email: user.email || '',
+    phone: user.phone || '',
+  };
+};
+
+const DEFAULT_STUDENT_PERIOD_PROGRESS = {
+  periodName: '',
+  courseNumber: 0,
+  points: 0,
+  approvedReportsCount: 0,
+  targetPoints: 0,
+  goalReached: false,
+};
+
+const normalizeStudentPeriodProgress = (raw = {}, fallbackPoints = 0) => {
+  const points = Number(raw.points ?? fallbackPoints ?? 0) || 0;
+  const targetPointsRaw = Number(raw.targetPoints ?? 0);
+  const targetPoints = Number.isFinite(targetPointsRaw) ? Math.max(targetPointsRaw, 0) : 0;
+
+  return {
+    periodName: String(raw.periodName ?? '').trim(),
+    courseNumber: Number(raw.courseNumber ?? 0) || 0,
+    points,
+    approvedReportsCount: Number(raw.approvedReportsCount ?? 0) || 0,
+    targetPoints,
+    goalReached: Boolean(raw.goalReached ?? (targetPoints > 0 && points >= targetPoints)),
+  };
+};
+
 const PersonalAccount = () => {
-  const navigate = useNavigate();
   const didLoadRef = useRef(false);
   const [reportModal, setReportModal] = useState(null);
   const [reportText, setReportText] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => getStoredAuthUser());
   const [myEvents, setMyEventsState] = useState([]);
   const [userPoints, setUserPointsState] = useState(0);
   const [events, setEvents] = useState([]);
   const [adminPendingReports, setAdminPendingReports] = useState([]);
   const [reportPointsById, setReportPointsById] = useState({});
-  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [studentPeriodProgress, setStudentPeriodProgress] = useState(DEFAULT_STUDENT_PERIOD_PROGRESS);
 
   const [adminCreateFormOpen, setAdminCreateFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [newEventData, setNewEventData] = useState(EMPTY_EVENT_FORM);
 
-  const [profileData, setProfileData] = useState(DEFAULT_PROFILE_DATA);
-
-  // Определяем роль по наличию course
+  const [profileData, setProfileData] = useState(() => toProfileData(getStoredAuthUser()));
   const isTeacher = currentUser ? isTeacherProfile(currentUser) : false;
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = hasAdminAccess(currentUser);
 
-  const goal = 100;
-  const remainingPoints = Math.max(goal - userPoints, 0);
-  const progressPercent = goal > 0 ? (userPoints / goal) * 100 : 0;
+  const goal = Number(studentPeriodProgress.targetPoints ?? 0) || 0;
+  const periodPoints = Number(studentPeriodProgress.points ?? 0) || 0;
+  const hasTargetGoal = goal > 0;
+  const progressPeriodName = studentPeriodProgress.periodName || 'Период не назначен';
+  const remainingPoints = Math.max(goal - periodPoints, 0);
+  const progressPercent = hasTargetGoal ? Math.min((periodPoints / goal) * 100, 100) : 0;
+  const goalReached = studentPeriodProgress.goalReached || (hasTargetGoal && periodPoints >= goal);
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }, []);
-
-
-  // Функция для получения текста специализации
-  const getSpecializationText = useCallback((user = currentUser) => {
-    if (user?.role === 'admin') return 'Администратор мероприятий';
-    if (isTeacherProfile(user)) return 'Преподаватель';
-    return 'Студент';
-  }, [currentUser]);
 
   const mergeEventsById = useCallback((primaryEvents = [], secondaryEvents = []) => {
     const merged = new Map();
@@ -101,20 +149,18 @@ const PersonalAccount = () => {
   }, []);
 
   const loadPageData = useCallback(async (user) => {
-    const token = getAuthToken();
-    if (!token) return;
 
     if (isTeacherProfile(user)) {
+      const isAdminUser = hasAdminAccess(user);
       const userOwnerIds = getUserOwnerIds(user);
       const isOwnedByCurrentUser = (event = {}) => {
         const ownerId = String(getEventOwnerId(event) ?? '').trim();
         return Boolean(ownerId && userOwnerIds.includes(ownerId));
       };
-      const allEventsRequest = fetchEvents(token, { statuses: EVENT_MANAGEMENT_STATUSES })
-        .then((result) => (result.length > 0 ? result : fetchEvents(token)));
-      const createdEventsRequest = fetchEvents(token, {
+      const allEventsRequest = fetchEvents({ statuses: EVENT_MANAGEMENT_STATUSES })
+        .then((result) => (result.length > 0 ? result : fetchEvents()));
+      const createdEventsRequest = fetchMyEvents({
         statuses: EVENT_MANAGEMENT_STATUSES,
-        createdByTeacherId: user.id,
       });
       const [allEventsResult, ownEventsResult] = await Promise.allSettled([
         allEventsRequest,
@@ -125,18 +171,91 @@ const PersonalAccount = () => {
       const ownedEvents = mergeEventsById(
         ownEvents,
         allEvents.filter(isOwnedByCurrentUser),
-      ).map((event) => ({ ...event, isOwnEvent: true }));
+      )
+        .map((event) => ({ ...event, isOwnEvent: true }));
       const visibleEvents = mergeEventsById(allEvents, ownedEvents);
-      const participationRecords = await fetchAdminPendingReports(token, ownedEvents);
+      const recordsSourceEvents = isAdminUser ? visibleEvents : ownedEvents;
+      const participationRecords = await fetchAdminPendingReports(recordsSourceEvents);
       setEvents(visibleEvents);
       setAdminPendingReports(participationRecords);
       setMyEventsState([]);
       setUserPointsState(0);
+      setStudentPeriodProgress(DEFAULT_STUDENT_PERIOD_PROGRESS);
     } else {
       setEvents([]);
-      const registeredEvents = await fetchMyRegisteredEvents(token);
-      setMyEventsState(registeredEvents);
-      setUserPointsState(user.points ?? 0);
+      const fallbackTotalPoints = Number(user.points ?? getStoredAuthUser()?.points ?? 0) || 0;
+      const [registeredEventsResult, activePeriodSummaryResult, totalSummaryResult, goalsResult] = await Promise.allSettled([
+        fetchMyRegisteredEvents(),
+        fetchCurrentUserActivePeriodSummary(),
+        fetchCurrentUserSummary(),
+        fetchCurrentUserGoals(),
+      ]);
+      const resolvedTotalPoints = totalSummaryResult.status === 'fulfilled'
+        ? (Number(totalSummaryResult.value.totalPoints ?? fallbackTotalPoints) || 0)
+        : fallbackTotalPoints;
+
+      if (registeredEventsResult.status !== 'fulfilled') {
+        throw registeredEventsResult.reason;
+      }
+
+      setMyEventsState(registeredEventsResult.value);
+
+      let resolvedProgress;
+
+      if (activePeriodSummaryResult.status === 'fulfilled') {
+        resolvedProgress = normalizeStudentPeriodProgress(activePeriodSummaryResult.value, resolvedTotalPoints);
+      } else {
+        console.warn('Failed to load active period summary:', activePeriodSummaryResult.reason);
+        const [periodsSummaryResult] = await Promise.allSettled([
+          fetchCurrentUserPeriodsSummary({
+            page: 0,
+            size: 1,
+            sortBy: 'updatedAt',
+            sortDirection: 'desc',
+          }),
+        ]);
+
+        if (periodsSummaryResult.status === 'fulfilled' && periodsSummaryResult.value.summaries.length > 0) {
+          resolvedProgress = normalizeStudentPeriodProgress(
+            periodsSummaryResult.value.summaries[0],
+            resolvedTotalPoints,
+          );
+        } else {
+          if (periodsSummaryResult.status !== 'fulfilled') {
+            console.warn('Failed to load periods summary:', periodsSummaryResult.reason);
+          }
+          resolvedProgress = normalizeStudentPeriodProgress({}, resolvedTotalPoints);
+        }
+      }
+      if (goalsResult.status === 'fulfilled') {
+        const goalsPayload = goalsResult.value ?? {};
+        const goalPeriodName = String(goalsPayload.name ?? '').trim();
+        const goalTargetPoints = Number(goalsPayload.targetPoints ?? 0) || 0;
+
+        if (goalPeriodName || goalTargetPoints > 0) {
+          resolvedProgress = normalizeStudentPeriodProgress({
+            ...resolvedProgress,
+            periodName: goalPeriodName || resolvedProgress.periodName,
+            targetPoints: goalTargetPoints > 0 ? goalTargetPoints : resolvedProgress.targetPoints,
+          }, resolvedTotalPoints);
+        }
+      } else {
+        console.warn('Failed to load current user goals:', goalsResult.reason);
+      }
+
+      const resolvedPoints = Number(resolvedTotalPoints) || 0;
+      setStudentPeriodProgress(resolvedProgress);
+      setUserPointsState(resolvedPoints);
+      setCurrentUser((prev) => (prev ? { ...prev, points: resolvedPoints } : prev));
+
+      if (resolvedPoints !== fallbackTotalPoints) {
+        saveAuthSession({
+          user: {
+            ...user,
+            points: resolvedPoints,
+          },
+        });
+      }
       setAdminPendingReports([]);
     }
   }, [mergeEventsById]);
@@ -144,82 +263,28 @@ const PersonalAccount = () => {
   useEffect(() => {
     if (didLoadRef.current) return;
     didLoadRef.current = true;
-
-    const token = getAuthToken();
-
-    if (!token) {
-      navigate('/AuthPage', { replace: true });
-      return;
-    }
-
-    // Загружаем данные пользователя с бэка
-    const loadInitialData = async () => {
-      let user;
-
-      try {
-        const fetchedUser = await fetchCurrentUser(token);
-        const storedUser = getStoredAuthUser();
-        user = {
-          ...fetchedUser,
-          points: fetchedUser.points || storedUser?.points || 0,
-        };
-        setCurrentUser(user);
-        
-        // Обновляем сессию с актуальными данными
-        saveAuthSession({ token, user });
-
-        // Формируем полное имя из firstName и lastName
-        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-        const displayName = fullName || user.login || 'Пользователь';
-        
-        setProfileData({
-          id: String(user.id ?? ''),
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          fullName: displayName,
-          course: user.course !== null && user.course !== undefined ? user.course : null,
-          direction: user.direction || '',
-          specialization: getSpecializationText(user),
-          email: user.email || '',
-          phone: user.phone || '',
-        });
-
-      } catch (error) {
-        console.error('Ошибка получения пользователя:', error);
-        if (error?.status === 404 || error?.status === 403) {
-          saveProfileSetupSession({ token });
-          navigate('/ProfileSetup', { replace: true });
-          return;
-        }
-        clearAuthSession();
-        navigate('/AuthPage', { replace: true });
-        return;
-      }
-
-      try {
-        await loadPageData(user);
-      } catch (error) {
-        console.error('Ошибка загрузки данных личного кабинета:', error);
-        setEvents([]);
-        setMyEventsState([]);
-        setAdminPendingReports([]);
-        setUserPointsState(user.points ?? 0);
-      } finally {
-        setLoading(false);
-      }
+    const defaultUser = {
+      id: 'dev-user',
+      ldapId: 'dev-user',
+      login: 'dev-user',
+      firstName: 'Dev',
+      lastName: 'User',
+      fullName: 'Dev User',
+      role: 'student',
+      accessLevel: 'student',
+      points: 0,
+      direction: '',
+      course: null,
     };
+    const user = getStoredAuthUser() || defaultUser;
 
-    loadInitialData();
-  }, [navigate, loadPageData, getSpecializationText]);
-
-  const pendingPoints = myEvents
-    .filter((event) => event.reportLink && ['pending', 'submitted'].includes(event.reportStatus))
-    .reduce((sum, event) => sum + event.points, 0);
-
-  const adminCreatedEvents = useMemo(() => {
-    if (!isTeacher && !isAdmin) return [];
-    return events;
-  }, [isTeacher, isAdmin, events]);
+    setCurrentUser(user);
+    setProfileData(toProfileData(user));
+    saveAuthSession({ user });
+    loadPageData(user).catch((error) => {
+      console.warn('Initial personal account data load failed:', error);
+    });
+  }, [loadPageData]);
 
   const canManageEvent = useCallback((event = {}) => {
     if (!isTeacher && !isAdmin) return false;
@@ -264,8 +329,8 @@ const PersonalAccount = () => {
       return false;
     }
 
-    if (!/^https:\/\/telegra\.ph\/.+/i.test(reportLink)) {
-      showToast('Отчет должен быть ссылкой на Telegraph в формате https://telegra.ph/...', 'error');
+    if (!/^https:\/\/telegra\.ph\/.*$/i.test(reportLink)) {
+      showToast('Отчет должен быть ссылкой на Telegraph в формате https://telegra.ph/', 'error');
       return false;
     }
 
@@ -296,14 +361,13 @@ const PersonalAccount = () => {
   };
 
   const handleSaveReportDraft = async () => {
-    const token = getAuthToken();
-    if (!token || !currentUser || !reportModal) return;
+    if (!currentUser || !reportModal) return;
 
     const reportLink = reportText.trim();
     if (!validateReportLink(reportLink)) return;
 
     try {
-      const report = await saveEventReportDraft(token, {
+      const report = await saveEventReportDraft({
         eventPublicId: reportModal.eventPublicId,
         publicId: reportModal.publicId,
         forceCreate: !reportModal.hasExistingReport,
@@ -325,14 +389,13 @@ const PersonalAccount = () => {
   };
 
   const handleSubmitReport = async () => {
-    const token = getAuthToken();
-    if (!token || !currentUser || !reportModal) return;
+    if (!currentUser || !reportModal) return;
 
     const reportLink = reportText.trim();
     if (!validateReportLink(reportLink)) return;
 
     try {
-      const report = await submitEventReport(token, {
+      const report = await submitEventReport({
         eventPublicId: reportModal.eventPublicId,
         publicId: reportModal.publicId,
         forceCreate: !reportModal.hasExistingReport,
@@ -354,8 +417,7 @@ const PersonalAccount = () => {
   };
 
   const handleSubmitSavedReport = async (event) => {
-    const token = getAuthToken();
-    if (!token || !currentUser) return;
+    if (!currentUser) return;
 
     const eventPublicId = event.eventPublicId || event.publicId || event.id;
     const publicId = event.reportPublicId;
@@ -369,7 +431,7 @@ const PersonalAccount = () => {
     if (!validateReportLink(reportLink)) return;
 
     try {
-      const report = await submitEventReport(token, {
+      const report = await submitEventReport({
         eventPublicId,
         publicId,
         reportLink,
@@ -388,12 +450,11 @@ const PersonalAccount = () => {
   };
 
   const handleReviewReport = async (submission, nextStatus) => {
-    const token = getAuthToken();
-    if (!token) return;
 
     try {
       const normalizedStatus = String(nextStatus).toLowerCase();
       const isAcceptAction = normalizedStatus === 'accepted' || normalizedStatus === 'approved';
+      const isRefuseAction = normalizedStatus === 'refused' || normalizedStatus === 'rejected';
       const reportKey = getReportReviewKey(submission);
       const submissionEventId = getSubmissionEventId(submission);
       const submissionPublicId = getSubmissionPublicId(submission);
@@ -411,6 +472,17 @@ const PersonalAccount = () => {
           keys: submission && typeof submission === 'object' ? Object.keys(submission) : [],
         });
         showToast('Нельзя принять или отклонить отчет: не удалось найти publicId записи или eventPublicId мероприятия', 'error');
+        await loadPageData(currentUser);
+        return;
+      }
+
+      const matchedEvent = events.find((event) => {
+        const eventId = String(event.publicId || event.id || '').trim();
+        return eventId && eventId === String(submissionEventId);
+      });
+
+      if (!matchedEvent || !canManageEvent(matchedEvent)) {
+        showToast('Можно отменять проверку только отчетов по своим мероприятиям', 'error');
         await loadPageData(currentUser);
         return;
       }
@@ -441,7 +513,7 @@ const PersonalAccount = () => {
           points: awardedPoints,
         });
 
-        await reviewReport(token, {
+        await reviewReport({
           publicId: submissionPublicId,
           eventPublicId: submissionEventId,
         }, nextStatus, submissionEventId, {
@@ -457,10 +529,17 @@ const PersonalAccount = () => {
         return;
       }
 
-      await reviewReport(token, {
+      await reviewReport({
         publicId: submissionPublicId,
         eventPublicId: submissionEventId,
       }, nextStatus, submissionEventId);
+
+      if (isRefuseAction) {
+        await loadPageData(currentUser);
+        showToast('Проверка отчета отменена', 'success');
+        return;
+      }
+
       await loadPageData(currentUser);
       showToast('Статус отчета обновлен', 'success');
     } catch (error) {
@@ -535,9 +614,6 @@ const PersonalAccount = () => {
       return;
     }
 
-    const token = getAuthToken();
-    if (!token) return;
-
     try {
       const payload = {
         title: submitData.title.trim(),
@@ -561,7 +637,7 @@ const PersonalAccount = () => {
           return;
         }
 
-        const updatedEvent = await updateEvent(token, publicId, payload);
+        const updatedEvent = await updateEvent(publicId, payload);
         setEvents((prev) => prev.map((item) => {
           const itemId = item.publicId || item.id;
           return itemId === publicId
@@ -573,7 +649,7 @@ const PersonalAccount = () => {
         return;
       }
 
-      const createdEvent = await createEvent(token, payload);
+      const createdEvent = await createEvent(payload);
       const publicId = createdEvent.publicId;
       const { publicationError, ...eventData } = createdEvent;
       const nextEvent = { ...eventData, ...payload, publicId, isOwnEvent: true };
@@ -592,10 +668,9 @@ const PersonalAccount = () => {
   };
 
   const handlePublishEvent = async (event) => {
-    const token = getAuthToken();
     const publicId = event.publicId || event.id;
 
-    if (!token || !publicId) {
+    if (!publicId) {
       showToast('Не удалось определить мероприятие для публикации', 'error');
       return;
     }
@@ -606,7 +681,7 @@ const PersonalAccount = () => {
     }
 
     try {
-      const publishedEvent = await publishEvent(token, publicId);
+      const publishedEvent = await publishEvent(publicId);
       setEvents((prev) => prev.map((item) => {
         const itemId = item.publicId || item.id;
         return itemId === publicId
@@ -625,10 +700,9 @@ const PersonalAccount = () => {
   };
 
   const handleFinishEvent = async (event) => {
-    const token = getAuthToken();
     const publicId = event.publicId || event.id;
 
-    if (!token || !publicId) {
+    if (!publicId) {
       showToast('Не удалось определить мероприятие для завершения', 'error');
       return;
     }
@@ -639,7 +713,7 @@ const PersonalAccount = () => {
     }
 
     try {
-      const finishedEvent = await finishEvent(token, publicId);
+      const finishedEvent = await finishEvent(publicId);
       setEvents((prev) => prev.map((item) => {
         const itemId = item.publicId || item.id;
         return itemId === publicId
@@ -653,10 +727,9 @@ const PersonalAccount = () => {
   };
 
   const handleCancelEvent = async (event) => {
-    const token = getAuthToken();
     const publicId = event.publicId || event.id;
 
-    if (!token || !publicId) {
+    if (!publicId) {
       showToast('Не удалось определить мероприятие для отмены', 'error');
       return;
     }
@@ -667,7 +740,7 @@ const PersonalAccount = () => {
     }
 
     try {
-      const cancelledEvent = await cancelEvent(token, publicId);
+      const cancelledEvent = await cancelEvent(publicId);
       setEvents((prev) => prev.map((item) => {
         const itemId = item.publicId || item.id;
         return itemId === publicId
@@ -680,10 +753,60 @@ const PersonalAccount = () => {
     }
   };
 
+  const handleDownloadEventsTemplate = async () => {
 
-  if (loading) {
-    return <div className={styles.profilePage}>Загрузка...</div>;
-  }
+    try {
+      const { blob, fileName, contentType } = await fetchEventsImportTemplate();
+      const downloadBlob = blob instanceof Blob
+        ? blob
+        : new Blob([blob], { type: contentType || 'application/octet-stream' });
+      const downloadUrl = window.URL.createObjectURL(downloadBlob);
+      const link = document.createElement('a');
+
+      link.href = downloadUrl;
+      link.download = fileName || 'events-import-template.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      showToast('Шаблон импорта скачан', 'success');
+    } catch (error) {
+      console.error('Template download error:', error);
+      showToast(error.message || 'Не удалось скачать шаблон импорта', 'error');
+    }
+  };
+
+  const handleImportEventsCsv = async (file) => {
+    if (!(file instanceof File)) {
+      showToast('Выберите CSV-файл для импорта', 'error');
+      return false;
+    }
+
+    const isCsvType = String(file.type || '').toLowerCase().includes('csv');
+    const isCsvName = String(file.name || '').toLowerCase().endsWith('.csv');
+    if (!isCsvType && !isCsvName) {
+      showToast('Поддерживаются только CSV-файлы', 'error');
+      return false;
+    }
+
+    try {
+      await importEventsFromCsv(file);
+      if (currentUser) {
+        await loadPageData(currentUser);
+      }
+      showToast('Импорт мероприятий завершен', 'success');
+      return true;
+    } catch (error) {
+      console.error('Events import error:', error);
+      showToast(
+        error?.status === 403
+          ? 'Импорт запрещен: недостаточно прав'
+          : (error.message || 'Не удалось импортировать CSV'),
+        'error',
+      );
+      return false;
+    }
+  };
 
   return (
     <div className={styles.profilePage}>
@@ -704,18 +827,9 @@ const PersonalAccount = () => {
         {(isTeacher || isAdmin) ? (
           <>
             <AdminSummaryCards
-              eventsCount={adminCreatedEvents.length}
-              pendingReportsCount={adminPendingReports.length}
               onCreate={handleOpenCreateForm}
-            />
-
-            <AdminEventsList
-              events={adminCreatedEvents}
-              canManageEvent={canManageEvent}
-              onEdit={handleOpenEditForm}
-              onPublish={handlePublishEvent}
-              onFinish={handleFinishEvent}
-              onCancel={handleCancelEvent}
+              onDownloadTemplate={handleDownloadEventsTemplate}
+              onImportCsv={handleImportEventsCsv}
             />
 
             <AdminReportsList
@@ -729,8 +843,11 @@ const PersonalAccount = () => {
           <>
             <StatsSection
               userPoints={userPoints}
-              pendingPoints={pendingPoints}
+              periodPoints={periodPoints}
               goal={goal}
+              hasTargetGoal={hasTargetGoal}
+              periodName={progressPeriodName}
+              goalReached={goalReached}
               remainingPoints={remainingPoints}
               progressPercent={progressPercent}
             />
@@ -769,3 +886,9 @@ const PersonalAccount = () => {
 };
 
 export default PersonalAccount;
+
+
+
+
+
+

@@ -1,15 +1,14 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+﻿import React from 'react';
+import { NavLink } from 'react-router-dom';
 import styles from './AppSidebar.module.css';
-import { clearAuthSession } from '../../api/session';
+import { getStoredAuthUser } from '../../api/session';
 
 const AppSidebar = ({ activePage, logoSrc, brandName = 'it-college' }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate('/AuthPage', { replace: true });
-  };
+  const currentUser = getStoredAuthUser();
+  const normalizedRole = String(currentUser?.role ?? '').trim().toLowerCase();
+  const normalizedAccessLevel = String(currentUser?.accessLevel ?? '').trim().toLowerCase();
+  const canManageUsers = ['admin', 'moderator'].includes(normalizedRole)
+    || ['admin', 'moderator'].includes(normalizedAccessLevel);
 
   return (
     <aside className={styles.sidebar}>
@@ -31,13 +30,15 @@ const AppSidebar = ({ activePage, logoSrc, brandName = 'it-college' }) => {
         >
           Личный кабинет
         </NavLink>
+        {canManageUsers && (
+          <NavLink
+            to="/Users"
+            className={`${styles.navItem} ${activePage === 'users' ? styles.active : ''}`}
+          >
+            Пользователи
+          </NavLink>
+        )}
       </nav>
-
-      <div className={styles.sidebarFooter}>
-        <button type="button" className={styles.navItem} onClick={handleLogout}>
-          Выйти
-        </button>
-      </div>
     </aside>
   );
 };

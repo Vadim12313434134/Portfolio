@@ -2,11 +2,26 @@ import styles from '../PersonalAccountStyle.module.css';
 
 const StatsSection = ({
   userPoints,
-  pendingPoints,
+  periodPoints,
   goal,
+  hasTargetGoal,
+  periodName,
+  goalReached,
   remainingPoints,
   progressPercent,
 }) => {
+  const goalHeaderText = hasTargetGoal
+    ? `Достижение цели в ${goal} баллов`
+    : 'Цель периода не задана';
+
+  const goalPeriodText = hasTargetGoal
+    ? `Период: ${periodName}. Цель: ${goal} баллов`
+    : `Период: ${periodName}. Модератор еще не установил цель`;
+
+  const goalMessageText = !hasTargetGoal
+    ? 'Цель будет показана после настройки модератором'
+    : (goalReached ? 'Цель достигнута' : `До цели осталось ${remainingPoints} баллов`);
+
   return (
     <div className={styles.statsWrapper}>
       <div className={styles.pointsCard}>
@@ -29,11 +44,6 @@ const StatsSection = ({
         <p className={styles.pointsDescription}>
           Баллы начисляются после проверки преподавателем
         </p>
-
-        <div className={styles.pendingPoints}>
-          <span>⏳ На проверке: </span>
-          <strong>{pendingPoints} баллов</strong>
-        </div>
       </div>
 
       <div className={styles.goalCard}>
@@ -49,22 +59,22 @@ const StatsSection = ({
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M12 8v8M8 12h8"></path>
           </svg>
-          <h3>Достижение цели в {goal} баллов</h3>
+          <h3>{goalHeaderText}</h3>
         </div>
 
         <div className={styles.goalPeriod}>
-          Цель первого периода: {goal} баллов за Апрель
+          {goalPeriodText}
         </div>
 
         <div className={styles.goalStats}>
           <div className={styles.goalStatItem}>
             <span className={styles.goalStatLabel}>Было получено</span>
-            <span className={styles.goalStatValue}>{userPoints} баллов</span>
+            <span className={styles.goalStatValue}>{periodPoints} баллов</span>
           </div>
           <div className={styles.goalStatItem}>
             <span className={styles.goalStatLabel}>Осталось</span>
             <span className={styles.goalStatValue}>
-              {remainingPoints} баллов
+              {hasTargetGoal ? `${remainingPoints} баллов` : '—'}
             </span>
           </div>
         </div>
@@ -77,9 +87,7 @@ const StatsSection = ({
         </div>
 
         <div className={styles.goalMessage}>
-          {progressPercent >= 100
-            ? '🎉 Поздравляем! Цель достигнута! 🎉'
-            : `До цели осталось ${remainingPoints} баллов`}
+          {goalMessageText}
         </div>
       </div>
     </div>
@@ -87,4 +95,3 @@ const StatsSection = ({
 };
 
 export default StatsSection;
-

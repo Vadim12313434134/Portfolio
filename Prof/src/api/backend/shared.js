@@ -2,9 +2,24 @@
 export const ENDPOINTS = {
   login: '/auth/login',
   users: '/users',
+  usersSearch: '/users/search',
   usersMe: '/users/me',
+  usersSummary: '/users/me/summary',
+  usersMeGoals: '/users/me/goals',
+  usersMeSummaryPeriods: '/users/me/summary/periods',
+  usersMeSummaryActivePeriod: '/users/me/summary/active-period',
+  period: '/period',
+  periodByName: (name) => `/period/${encodeURIComponent(String(name ?? ''))}`,
+  periodArchivate: (name) => `/period/${encodeURIComponent(String(name ?? ''))}/archivate`,
+  periodActivate: (name) => `/period/${encodeURIComponent(String(name ?? ''))}/activate`,
+  goals: '/goals',
+  goalByPublicId: (publicId) => `/goals/${encodeURIComponent(String(publicId ?? '').trim())}`,
   userByLdapId: (ldapId) => `/users/${ldapId}`,
+  userBlock: (ldapId) => `/users/${encodeURIComponent(String(ldapId ?? '').trim())}/block`,
+  userUnblock: (ldapId) => `/users/${encodeURIComponent(String(ldapId ?? '').trim())}/unblock`,
   events: '/events',
+  eventsImportCsv: '/events/import/csv',
+  eventsImportTemplate: '/events/import/template',
   eventsSearch: '/events/search',
   myEventsSearch: '/events/search/my',
   eventById: (publicId) => `/events/${publicId}`,
@@ -44,9 +59,35 @@ export const normalizeRoleValue = (role) => {
   const value = toLower(role).replace(/^role[-_]/, '');
 
   if (value === 'admin') return 'admin';
+  if (value === 'moderator') return 'admin';
   if (value === 'teacher' || value === 'prepod' || value === 'prof') return 'teacher';
-  if (value === 'user' || value === 'student' || value === 'moderator') return 'student';
+  if (value === 'user' || value === 'student') return 'student';
   return '';
+};
+
+export const normalizeAccessLevelValue = (accessLevel) => {
+  const value = toLower(accessLevel).replace(/^access[-_]?level[-_]?/, '');
+
+  if (value === 'admin') return 'admin';
+  if (value === 'moderator') return 'admin';
+  if (value === 'teacher' || value === 'prepod' || value === 'prof') return 'teacher';
+  if (value === 'user' || value === 'student') return 'student';
+  return '';
+};
+
+export const isAdminAccess = (userOrValue) => {
+  if (userOrValue && typeof userOrValue === 'object') {
+    const accessLevel = normalizeAccessLevelValue(
+      userOrValue.accessLevel
+        ?? userOrValue.AccessLevel
+        ?? userOrValue.access_level
+        ?? userOrValue.ACCESS_LEVEL,
+    );
+    const role = normalizeRoleValue(userOrValue.role ?? userOrValue.Role);
+    return accessLevel === 'admin' || role === 'admin';
+  }
+
+  return normalizeAccessLevelValue(userOrValue) === 'admin' || normalizeRoleValue(userOrValue) === 'admin';
 };
 
 const canUseLocalStorage = () => typeof localStorage !== 'undefined';
@@ -114,20 +155,35 @@ Object.assign(DIRECTION_LABELS, {
 });
 
 export const getEventPublicId = (raw = {}) =>
-  raw.PublicId
-    ?? raw.PublicID
-    ?? raw.publicId
-    ?? raw.publicID
-    ?? raw.public_id
-    ?? raw.EventPublicId
-    ?? raw.EventPublicID
-    ?? raw.eventPublicId
-    ?? raw.eventPublicID
-    ?? raw.Id
-    ?? raw.id
-    ?? raw.Uuid
-    ?? raw.uuid
-    ?? '';
+  pickPublicId([
+    raw.PublicId,
+    raw.PublicID,
+    raw.publicId,
+    raw.publicID,
+    raw.public_id,
+    raw.EventPublicId,
+    raw.EventPublicID,
+    raw.eventPublicId,
+    raw.eventPublicID,
+    raw.EventId,
+    raw.eventId,
+    raw.Uuid,
+    raw.uuid,
+    raw.Event?.PublicId,
+    raw.Event?.PublicID,
+    raw.Event?.publicId,
+    raw.Event?.publicID,
+    raw.event?.publicId,
+    raw.event?.publicID,
+    raw.Event?.EventPublicId,
+    raw.Event?.EventPublicID,
+    raw.event?.eventPublicId,
+    raw.event?.eventPublicID,
+    raw.Event?.Uuid,
+    raw.event?.uuid,
+    raw.Id,
+    raw.id,
+  ]);
 
 export const getEventDateTime = (raw = {}) =>
   raw.EventDateTime
@@ -219,13 +275,16 @@ export const getPagedContent = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.content)) return data.content;
   if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.users)) return data.users;
   if (Array.isArray(data?.events)) return data.events;
   if (Array.isArray(data?.data)) return data.data;
   if (Array.isArray(data?.data?.content)) return data.data.content;
   if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.users)) return data.data.users;
   if (Array.isArray(data?.data?.events)) return data.data.events;
   if (Array.isArray(data?.result?.content)) return data.result.content;
   if (Array.isArray(data?.result?.items)) return data.result.items;
+  if (Array.isArray(data?.result?.users)) return data.result.users;
   if (Array.isArray(data?.result?.events)) return data.result.events;
   return [];
 };
@@ -244,10 +303,17 @@ export const getParticipationRecordPayload = (data) => {
   const payload = data?.participationRecord
     ?? data?.participationRecordResponse
     ?? data?.participationRecordDto
+    ?? data?.ParticipationRecord
+    ?? data?.ParticipationRecordResponse
+    ?? data?.ParticipationRecordDto
     ?? data?.record
+    ?? data?.Record
     ?? data?.report
+    ?? data?.Report
     ?? data?.item
+    ?? data?.Item
     ?? data?.data
+    ?? data?.Data
     ?? data
     ?? {};
   if (!payload || typeof payload !== 'object') return payload;
@@ -268,15 +334,35 @@ export const toRuDate = (value) => {
 };
 
 const normalizeRole = (raw = {}) => {
-  const role = normalizeRoleValue(raw.role);
+  if (isAdminAccess(raw)) return 'admin';
+
+  const accessLevelRole = normalizeAccessLevelValue(
+    raw.accessLevel
+      ?? raw.AccessLevel
+      ?? raw.access_level
+      ?? raw.ACCESS_LEVEL,
+  );
+  if (accessLevelRole) return accessLevelRole;
+
+  const role = normalizeRoleValue(raw.role ?? raw.Role);
   if (role) return role;
   return raw.course === null || raw.course === undefined ? 'teacher' : 'student';
 };
 
 export const isTeacherProfile = (user) => {
   if (!user) return false;
-  const role = normalizeRoleValue(user.role);
+  if (isAdminAccess(user)) return true;
 
+  const accessLevelRole = normalizeAccessLevelValue(
+    user.accessLevel
+      ?? user.AccessLevel
+      ?? user.access_level
+      ?? user.ACCESS_LEVEL,
+  );
+  if (accessLevelRole === 'teacher') return true;
+  if (accessLevelRole === 'student') return false;
+
+  const role = normalizeRoleValue(user.role ?? user.Role);
   if (role === 'admin' || role === 'teacher') return true;
   if (role === 'student') return false;
 
@@ -285,9 +371,16 @@ export const isTeacherProfile = (user) => {
 
 export const normalizeUser = (raw = {}) => {
   const firstName = raw.firstName ?? raw.name ?? raw.first_name ?? '';
-  const lastName = raw.lastName ?? raw.surname ?? raw.last_name ?? '';
+  const lastName = raw.lastName ?? raw.secondName ?? raw.surname ?? raw.last_name ?? '';
   const ldapId = raw.ldapId ?? raw.ldap_id ?? raw.id ?? raw.userId ?? raw.login ?? raw.username ?? '';
   const course = toNumberOrNull(raw.course);
+  const normalizedAccessLevel = normalizeAccessLevelValue(
+    raw.accessLevel
+      ?? raw.AccessLevel
+      ?? raw.access_level
+      ?? raw.ACCESS_LEVEL,
+  );
+  const rawAccessLevel = raw.accessLevel ?? raw.AccessLevel ?? raw.access_level ?? raw.ACCESS_LEVEL ?? '';
 
   return {
     id: raw.id ?? ldapId,
@@ -299,8 +392,10 @@ export const normalizeUser = (raw = {}) => {
     direction: raw.direction ?? raw.specialization ?? '',
     specialization: raw.direction ?? raw.specialization ?? '',
     course,
-    role: normalizeRole({ ...raw, course }),
+    role: normalizeRole({ ...raw, course, accessLevel: normalizedAccessLevel || rawAccessLevel }),
+    accessLevel: normalizedAccessLevel || rawAccessLevel || '',
     points: Number(raw.points ?? raw.totalPoints ?? 0) || 0,
+    blocked: toBooleanOrUndefined(raw.blocked ?? raw.Blocked ?? raw.isBlocked ?? raw.IsBlocked) ?? false,
   };
 };
 
@@ -352,10 +447,7 @@ export const normalizeEvent = (raw = {}) => {
 const needsEventDetails = (event = {}) =>
   Boolean(event.publicId) && (
     !event.eventDateTime
-    || !event.direction
-    || !event.location
-    || !event.course
-    || event.alreadyParticipation === undefined
+    || (!event.title && !event.description)
   );
 
 const stripUserEventState = (event = {}) => {
@@ -425,14 +517,14 @@ export const mergeCachedEventDetails = (event) => {
   return mergeEventDetails(event, stripUserEventState(cached));
 };
 
-export const enrichEventsWithDetails = async (token, events = [], fetchEventDetails) =>
+export const enrichEventsWithDetails = async (events = [], fetchEventDetails) =>
   Promise.all(events.map(async (event) => {
     const cachedEvent = mergeCachedEventDetails(event);
     if (!needsEventDetails(cachedEvent)) return cachedEvent;
 
     try {
       if (typeof fetchEventDetails !== 'function') return cachedEvent;
-      const details = await fetchEventDetails(token, cachedEvent.publicId);
+      const details = await fetchEventDetails(cachedEvent.publicId);
       return cacheEventDetails(mergeEventDetails(cachedEvent, details));
     } catch (error) {
       console.warn('Event details load failed:', error);
@@ -449,29 +541,173 @@ export const normalizeReportStatus = (status) => {
   return 'draft';
 };
 
-const getParticipationRecordPoints = (raw = {}, fallback = {}) =>
-  toNumberOrNull(
-    raw.points
-      ?? raw.Points
-      ?? raw.awardedPoints
-      ?? raw.AwardedPoints
-      ?? raw.score
-      ?? raw.Score
-      ?? raw.ParticipationRecord?.Points
-      ?? raw.ParticipationRecord?.AwardedPoints
-      ?? raw.participationRecord?.points
-      ?? raw.participationRecord?.awardedPoints
-      ?? raw.Record?.Points
-      ?? raw.Record?.AwardedPoints
-      ?? raw.record?.points
-      ?? raw.record?.awardedPoints
-      ?? raw.Report?.Points
-      ?? raw.Report?.AwardedPoints
-      ?? raw.report?.points
-      ?? raw.report?.awardedPoints
-      ?? fallback.points
-      ?? fallback.awardedPoints,
-  ) ?? 0;
+const hasValue = (value) => value !== undefined && value !== null && value !== '';
+
+const getFirstNumericValue = (values = []) => {
+  for (const value of values) {
+    const number = toNumberOrNull(value);
+    if (number !== null) return number;
+  }
+  return null;
+};
+
+const POINT_FIELD_PATTERN = /(point|score|grade|mark)/i;
+const EXCLUDED_POINT_FIELD_PATTERN = /(max|event|total|count|course|rating|progress|percent|average|sum)/i;
+
+const collectPointCandidates = (value, candidates, depth = 0, seen = new WeakSet()) => {
+  if (!value || typeof value !== 'object' || depth > 6 || seen.has(value)) return;
+  seen.add(value);
+
+  Object.entries(value).forEach(([key, nestedValue]) => {
+    const numeric = toNumberOrNull(nestedValue);
+    if (
+      numeric !== null
+      && POINT_FIELD_PATTERN.test(key)
+      && !EXCLUDED_POINT_FIELD_PATTERN.test(key)
+    ) {
+      candidates.push(numeric);
+    }
+
+    if (nestedValue && typeof nestedValue === 'object') {
+      collectPointCandidates(nestedValue, candidates, depth + 1, seen);
+    }
+  });
+};
+
+const inferAcceptedPoints = (raw = {}, fallback = {}) => {
+  const candidates = [];
+  collectPointCandidates(raw, candidates);
+
+  if (candidates.length === 0) return null;
+
+  const eventPoints = getFirstNumericValue([
+    raw.eventPoints,
+    raw.EventPoints,
+    raw.maxPoints,
+    raw.MaxPoints,
+    raw.event?.maxPoints,
+    raw.event?.points,
+    fallback.eventPoints,
+    fallback.maxPoints,
+  ]);
+
+  const positiveCandidates = candidates
+    .filter((value) => value > 0)
+    .sort((left, right) => right - left);
+
+  if (positiveCandidates.length === 0) return null;
+  if (eventPoints === null || eventPoints <= 0) return positiveCandidates[0];
+
+  const bounded = positiveCandidates.filter((value) => value <= eventPoints);
+  return bounded[0] ?? null;
+};
+
+const getParticipationRecordPoints = (raw = {}, fallback = {}) => {
+  const normalizedStatus = normalizeReportStatus(
+    raw.status
+      ?? raw.Status
+      ?? raw.participationRecord?.status
+      ?? raw.ParticipationRecord?.Status
+      ?? raw.record?.status
+      ?? raw.Record?.Status
+      ?? raw.report?.status
+      ?? raw.Report?.Status
+      ?? fallback.status,
+  );
+  const explicitAwardedPoints = getFirstNumericValue([
+    raw.awardedPoints,
+    raw.AwardedPoints,
+    raw.acceptedPoints,
+    raw.AcceptedPoints,
+    raw.reviewPoints,
+    raw.ReviewPoints,
+    raw.approvedPoints,
+    raw.ApprovedPoints,
+    raw.accruedPoints,
+    raw.AccruedPoints,
+    raw.participationRecord?.awardedPoints,
+    raw.participationRecord?.acceptedPoints,
+    raw.participationRecord?.reviewPoints,
+    raw.participationRecord?.approvedPoints,
+    raw.ParticipationRecord?.AwardedPoints,
+    raw.ParticipationRecord?.AcceptedPoints,
+    raw.ParticipationRecord?.ReviewPoints,
+    raw.ParticipationRecord?.ApprovedPoints,
+    raw.record?.awardedPoints,
+    raw.record?.acceptedPoints,
+    raw.record?.reviewPoints,
+    raw.record?.approvedPoints,
+    raw.Record?.AwardedPoints,
+    raw.Record?.AcceptedPoints,
+    raw.Record?.ReviewPoints,
+    raw.Record?.ApprovedPoints,
+    raw.report?.awardedPoints,
+    raw.report?.acceptedPoints,
+    raw.report?.reviewPoints,
+    raw.report?.approvedPoints,
+    raw.Report?.AwardedPoints,
+    raw.Report?.AcceptedPoints,
+    raw.Report?.ReviewPoints,
+    raw.Report?.ApprovedPoints,
+    fallback.awardedPoints,
+    fallback.points,
+  ]);
+
+  if (explicitAwardedPoints !== null) return explicitAwardedPoints;
+
+  const genericPoints = getFirstNumericValue([
+    raw.points,
+    raw.Points,
+    raw.score,
+    raw.Score,
+    raw.participationRecord?.points,
+    raw.ParticipationRecord?.Points,
+    raw.record?.points,
+    raw.Record?.Points,
+    raw.report?.points,
+    raw.Report?.Points,
+  ]);
+
+  if ((genericPoints === null || genericPoints <= 0) && normalizedStatus === 'accepted') {
+    const inferredPoints = inferAcceptedPoints(raw, fallback);
+    if (inferredPoints !== null) return inferredPoints;
+  }
+
+  if (genericPoints === null) return 0;
+
+  if (normalizedStatus === 'draft' || normalizedStatus === 'submitted') {
+    return 0;
+  }
+
+  const hasAnyExplicitAwardedField = [
+    raw.awardedPoints,
+    raw.AwardedPoints,
+    raw.acceptedPoints,
+    raw.AcceptedPoints,
+    raw.reviewPoints,
+    raw.ReviewPoints,
+    raw.approvedPoints,
+    raw.ApprovedPoints,
+  ].some(hasValue);
+
+  if (!hasAnyExplicitAwardedField) {
+    const eventPoints = getFirstNumericValue([
+      raw.eventPoints,
+      raw.EventPoints,
+      raw.maxPoints,
+      raw.MaxPoints,
+      raw.event?.maxPoints,
+      raw.event?.points,
+      fallback.eventPoints,
+      fallback.maxPoints,
+    ]);
+    if (eventPoints !== null && eventPoints > 0 && genericPoints > eventPoints) {
+      return 0;
+    }
+  }
+
+  return genericPoints;
+};
 
 export const normalizeReport = (raw = {}, fallback = {}) => ({
   publicId: pickPublicId([raw.publicId, raw.PublicId, raw.publicID, raw.PublicID, fallback.publicId]),
@@ -582,4 +818,5 @@ export function getUserDisplayName(user) {
   const fullName = user.fullName || [user.lastName, user.firstName].filter(Boolean).join(' ').trim();
   return fullName || user.login || `Пользователь #${user.id ?? ''}`;
 }
+
 
