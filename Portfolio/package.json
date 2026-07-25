@@ -3,13 +3,14 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "node server/index.js",
     "client": "npm run dev --prefix client",
-    "build": "npm run build --prefix client",
+    "build": "npm install --prefix client --include=dev --no-audit --no-fund && npm run build --prefix client",
     "start": "node server/index.js",
-    "install:all": "npm install && npm install --prefix client"
+    "install:all": "npm install && npm install --prefix client --include=dev"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -20,5 +21,8 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

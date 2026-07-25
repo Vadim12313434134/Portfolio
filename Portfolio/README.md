@@ -24,31 +24,43 @@ ADMIN_PASSWORD=ваш_пароль
 ADMIN_TOKEN_SECRET=длинная_случайная_строка
 ```
 
-Пароль по умолчанию в `.env`: `admin123` — смените перед публикацией.
+Пароль задаётся в `.env` (локально) или в переменных окружения хостинга.
 
-## Запуск (разработка)
+## Docker (рекомендуется для хостинга)
 
-В одном терминале:
+Локально:
 
 ```bash
-npm run dev
+docker compose up --build
 ```
 
-Откроется:
+Сайт: http://localhost:3000  
+Админка: http://localhost:3000/admin
 
-- Сайт: http://localhost:5173
-- API: http://localhost:3001
+На Deploy-f / Docker-хостинге:
 
-Админка: http://localhost:5173/admin
+1. Тип деплоя: **Docker**
+2. Dockerfile в корне проекта (уже есть)
+3. Переменные окружения:
 
-## Production
+```env
+PORT=3000
+HOST=0.0.0.0
+ADMIN_PASSWORD=ваш_пароль
+ADMIN_TOKEN_SECRET=длинная_случайная_строка
+```
+
+4. Команда запуска не нужна — используется `CMD` из Dockerfile: `node server/index.js`
+
+Проверка после деплоя: `/api/health` должен вернуть `{"ok":true,...}`.
+
+## Production без Docker
 
 ```bash
+npm install
 npm run build
 npm start
 ```
-
-Сервер на порту `3001` отдаёт API, загруженные фото и собранный фронтенд.
 
 ## Структура
 

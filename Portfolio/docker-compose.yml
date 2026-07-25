@@ -1,0 +1,18 @@
+services:
+  portfolio:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin05072007}
+      ADMIN_TOKEN_SECRET: ${ADMIN_TOKEN_SECRET:-portfolio-secret-change-me}
+    volumes:
+      - portfolio_uploads:/app/server/uploads
+      - portfolio_data:/app/server/data
+    restart: unless-stopped
+
+volumes:
+  portfolio_uploads:
+  portfolio_data:

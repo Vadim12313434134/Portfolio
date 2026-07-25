@@ -17,12 +17,19 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme'
 const ADMIN_TOKEN_SECRET = process.env.ADMIN_TOKEN_SECRET || 'portfolio-secret'
 const MAX_IMAGES = 10
 
-const dataPath = path.join(__dirname, 'data', 'projects.json')
+const dataDir = path.join(__dirname, 'data')
+const dataPath = path.join(dataDir, 'projects.json')
 const uploadsDir = path.join(__dirname, 'uploads')
 const clientDist = path.join(rootDir, 'client', 'dist')
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
+}
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true })
+}
+if (!fs.existsSync(dataPath)) {
+  fs.writeFileSync(dataPath, '[]', 'utf8')
 }
 
 const app = express()
@@ -218,6 +225,10 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
   res.json({ ok: true })
 })
 
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, dist: fs.existsSync(path.join(clientDist, 'index.html')) })
+})
+
 app.use((err, _req, res, _next) => {
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ error: err.message })
@@ -228,16 +239,21 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Server error' })
 })
 
-if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist))
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
-      return next()
-    }
+if (fs.existsSync(path.join(clientDist, 'index.html'))) {
+  app.use(express.static(clientDist, { index: 'index.html' }))
+  app.get(/^(?!\/api(?:\/|$)|\/uploads(?:\/|$)).*/, (_req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'))
+  })
+} else {
+  app.get('/', (_req, res) => {
+    res
+      .status(500)
+      .type('html')
+      .send('<h1>Build not found</h1><p>Нет client/dist. Соберите фронтенд перед запуском.</p>')
   })
 }
 
-app.listen(PORT, () => {
-  console.log(`Portfolio server running on http://localhost:${PORT}`)
+const host = process.env.HOST || '0.0.0.0'
+app.listen(Number(PORT), host, () => {
+  console.log(`Portfolio server running on http://${host}:${PORT}`)
 })
