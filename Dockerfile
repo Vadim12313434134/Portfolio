@@ -1,9 +1,8 @@
 # Build frontend
 FROM node:20-alpine AS client-build
-WORKDIR /app/client
-COPY client/package.json ./
+WORKDIR /app
+COPY package.json ./
 RUN npm install --no-audit --no-fund
-COPY client/ ./
 RUN npm run build
 
 # Production image
