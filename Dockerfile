@@ -17,7 +17,7 @@ COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 COPY server ./server
-COPY --from=client-build /app/client/dist ./client/dist
+COPY --from=client-build /app/dist ./dist
 
 RUN mkdir -p server/uploads server/data \
   && if [ ! -f server/data/projects.json ]; then echo '[]' > server/data/projects.json; fi
