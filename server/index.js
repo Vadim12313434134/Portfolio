@@ -20,7 +20,7 @@ const MAX_IMAGES = 10
 const dataDir = path.join(__dirname, 'data')
 const dataPath = path.join(dataDir, 'projects.json')
 const uploadsDir = path.join(__dirname, 'uploads')
-const clientDist = path.join(rootDir, 'client', 'dist')
+const distDir = path.join(rootDir, 'dist')
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
@@ -226,7 +226,7 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
 })
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, dist: fs.existsSync(path.join(clientDist, 'index.html')) })
+  res.json({ ok: true, dist: fs.existsSync(path.join(distDir, 'index.html')) })
 })
 
 app.use((err, _req, res, _next) => {
@@ -239,17 +239,17 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Server error' })
 })
 
-if (fs.existsSync(path.join(clientDist, 'index.html'))) {
-  app.use(express.static(clientDist, { index: 'index.html' }))
+if (fs.existsSync(path.join(distDir, 'index.html'))) {
+  app.use(express.static(distDir, { index: 'index.html' }))
   app.get(/^(?!\/api(?:\/|$)|\/uploads(?:\/|$)).*/, (_req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'))
+    res.sendFile(path.join(distDir, 'index.html'))
   })
 } else {
   app.get('/', (_req, res) => {
     res
       .status(500)
       .type('html')
-      .send('<h1>Build not found</h1><p>Нет client/dist. Соберите фронтенд перед запуском.</p>')
+      .send('<h1>Build not found</h1><p>No dist directory found. Build the frontend before starting the server.</p>')
   })
 }
 

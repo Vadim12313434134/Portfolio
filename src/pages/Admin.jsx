@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api, clearToken, getToken, setToken } from '../api/client'
+import { api, clearToken, getToken, setToken } from '../api'
 import { imageUrl, MAX_IMAGES, photoLabel } from '../config'
 import './Admin.css'
 

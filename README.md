@@ -66,7 +66,7 @@ npm start
 
 ```
 Portfolio/
-  client/     # Vite + React
+  src/        # Vite + React
   server/     # Express API + uploads
   .env
 ```

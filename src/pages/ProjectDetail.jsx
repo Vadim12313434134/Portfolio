@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api } from '../api/client'
+import { api } from '../api'
 import { photoLabel } from '../config'
 import ImageSlider from '../components/ImageSlider'
 import './ProjectDetail.css'

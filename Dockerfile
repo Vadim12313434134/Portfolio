@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:20-alpine AS client-build
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY package.json ./
 RUN npm install --no-audit --no-fund
@@ -17,7 +17,7 @@ COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 COPY server ./server
-COPY --from=client-build /app/dist ./dist
+COPY --from=frontend-build /app/dist ./dist
 
 RUN mkdir -p server/uploads server/data \
   && if [ ! -f server/data/projects.json ]; then echo '[]' > server/data/projects.json; fi

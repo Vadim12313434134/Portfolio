@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../api/client'
+import { api } from '../api'
 import { BRAND_NAME, BRAND_TAGLINE } from '../config'
 import ProjectCard from '../components/ProjectCard'
 import './Home.css'
