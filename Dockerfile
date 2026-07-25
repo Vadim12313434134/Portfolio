@@ -1,8 +1,11 @@
 # Build frontend
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY index.html vite.config.js ./
+COPY src ./src
+COPY public ./public
 RUN npm run build
 
 # Production image
@@ -14,7 +17,8 @@ ENV HOST=0.0.0.0
 ENV PORT=3000
 
 COPY package.json ./
-RUN npm install --omit=dev --no-audit --no-fund
+COPY package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
 COPY server ./server
 COPY --from=frontend-build /app/dist ./dist
